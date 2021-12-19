@@ -4,6 +4,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.w3c.dom.Document;
 
 /**
  * <pre>
@@ -18,7 +19,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @XStreamAlias("xml")
 public class WxPayFacepayResult extends BaseWxPayResult {
-
   private static final long serialVersionUID = -4116580976046716911L;
 
   /**
@@ -241,5 +241,31 @@ public class WxPayFacepayResult extends BaseWxPayResult {
    **/
   @XStreamAlias("time_end")
   private String timeEnd;
+
+  /**
+   * 从XML结构中加载额外的熟悉
+   *
+   * @param d Document
+   */
+  @Override
+  protected void loadXml(Document d) {
+    deviceInfo = readXmlString(d, "device_info");
+    openid = readXmlString(d, "openid");
+    isSubscribe = readXmlString(d, "is_subscribe");
+    subOpenid = readXmlString(d, "sub_openid");
+    subsSubscribe = readXmlString(d, "sub_is_subscribe");
+    tradeType = readXmlString(d, "trade_type");
+    bankType = readXmlString(d, "bank_type");
+    feeType = readXmlString(d, "fee_type");
+    totalFee = readXmlInteger(d, "total_fee");
+    cashFeeType = readXmlString(d, "cash_fee_type");
+    cashFee = readXmlInteger(d, "cash_fee");
+    transactionId = readXmlString(d, "transaction_id");
+    outTradeNo = readXmlString(d, "out_trade_no");
+    detail = readXmlString(d, "detail");
+    attach = readXmlString(d, "attach");
+    promotionDetail = readXmlString(d, "promotion_detail");
+    timeEnd = readXmlString(d, "time_end");
+  }
 
 }

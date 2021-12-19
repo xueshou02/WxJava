@@ -1,6 +1,7 @@
 package com.github.binarywang.wxpay.service;
 
 import com.github.binarywang.wxpay.bean.entpay.*;
+import com.github.binarywang.wxpay.bean.entwxpay.EntWxEmpPayRequest;
 import com.github.binarywang.wxpay.exception.WxPayException;
 
 /**
@@ -119,4 +120,39 @@ public interface EntPayService {
    * @throws WxPayException the wx pay exception
    */
   EntPayBankQueryResult queryPayBank(EntPayBankQueryRequest request) throws WxPayException;
+
+  /**
+   * 企业发送微信红包给个人用户
+   * <pre>
+   *   文档地址：https://work.weixin.qq.com/api/doc
+   *   接口地址： https://api.mch.weixin.qq.com/mmpaymkttransfers/sendworkwxredpack
+   * </pre>
+   * @param request 请求对象
+   * @return the wx pay send redpack result
+   * @throws WxPayException the wx pay exception
+   */
+  EntPayRedpackResult sendEnterpriseRedpack(EntPayRedpackRequest request) throws WxPayException;
+
+  /**
+   * 企业发送微信红包查询
+   * <pre>
+   *   文档地址：https://work.weixin.qq.com/api/doc
+   *   接口地址： https://api.mch.weixin.qq.com/mmpaymkttransfers/queryworkwxredpack
+   * </pre>
+   * @param request 请求对象
+   * @return the wx pay send redpack result
+   * @throws WxPayException the wx pay exception
+   */
+  EntPayRedpackQueryResult queryEnterpriseRedpack(EntPayRedpackQueryRequest request) throws WxPayException;
+
+  /**
+   * 向员工付款
+   * 文档详见 https://work.weixin.qq.com/api/doc/90000/90135/90278
+   * 接口链接 https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/paywwsptrans2pocket
+   *
+   * @param request 请求对象
+   * @return EntPayResult the ent pay result
+   * @throws WxPayException the wx pay exception
+   */
+  EntPayResult toEmpPay(EntWxEmpPayRequest request) throws WxPayException;
 }

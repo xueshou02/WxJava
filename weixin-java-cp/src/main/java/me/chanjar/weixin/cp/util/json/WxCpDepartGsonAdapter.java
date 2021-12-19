@@ -8,17 +8,11 @@
  */
 package me.chanjar.weixin.cp.util.json;
 
-import java.lang.reflect.Type;
-
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
 import me.chanjar.weixin.common.util.json.GsonHelper;
 import me.chanjar.weixin.cp.bean.WxCpDepart;
+
+import java.lang.reflect.Type;
 
 /**
  * WxCpDepart的gson适配器.
@@ -28,6 +22,8 @@ import me.chanjar.weixin.cp.bean.WxCpDepart;
 public class WxCpDepartGsonAdapter implements JsonSerializer<WxCpDepart>, JsonDeserializer<WxCpDepart> {
   private static final String ID = "id";
   private static final String NAME = "name";
+  private static final String EN_NAME = "name_en";
+  private static final String DEPARTMENT_LEADER = "department_leader";
   private static final String PARENT_ID = "parentid";
   private static final String ORDER = "order";
 
@@ -39,6 +35,16 @@ public class WxCpDepartGsonAdapter implements JsonSerializer<WxCpDepart>, JsonDe
     }
     if (group.getName() != null) {
       json.addProperty(NAME, group.getName());
+    }
+    if (group.getEnName() != null) {
+      json.addProperty(EN_NAME, group.getEnName());
+    }
+    if (group.getDepartmentLeader() != null) {
+      JsonArray jsonArray = new JsonArray();
+      for (String department : group.getDepartmentLeader()) {
+        jsonArray.add(new JsonPrimitive(department));
+      }
+      json.add(DEPARTMENT_LEADER, jsonArray);
     }
     if (group.getParentId() != null) {
       json.addProperty(PARENT_ID, group.getParentId());
@@ -59,6 +65,18 @@ public class WxCpDepartGsonAdapter implements JsonSerializer<WxCpDepart>, JsonDe
     }
     if (departJson.get(NAME) != null && !departJson.get(NAME).isJsonNull()) {
       depart.setName(GsonHelper.getAsString(departJson.get(NAME)));
+    }
+    if (departJson.get(EN_NAME) != null && !departJson.get(EN_NAME).isJsonNull()) {
+      depart.setEnName(GsonHelper.getAsString(departJson.get(EN_NAME)));
+    }
+    if (departJson.getAsJsonArray(DEPARTMENT_LEADER) != null && !departJson.get(DEPARTMENT_LEADER).isJsonNull()) {
+      JsonArray jsonArray = departJson.getAsJsonArray(DEPARTMENT_LEADER);
+      String[] departments = new String[jsonArray.size()];
+      int i = 0;
+      for (JsonElement jsonElement : jsonArray) {
+        departments[i++] = jsonElement.getAsString();
+      }
+      depart.setDepartmentLeader(departments);
     }
     if (departJson.get(ORDER) != null && !departJson.get(ORDER).isJsonNull()) {
       depart.setOrder(GsonHelper.getAsLong(departJson.get(ORDER)));

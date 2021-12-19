@@ -1,6 +1,6 @@
 package cn.binarywang.wx.miniapp.bean;
 
-import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
+import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -20,6 +20,9 @@ public class WxMaUserInfo implements Serializable {
   private String province;
   private String country;
   private String avatarUrl;
+  /**
+   * 不绑定开放平台不会返回这个字段
+   */
   private String unionId;
   private Watermark watermark;
 
@@ -27,9 +30,4 @@ public class WxMaUserInfo implements Serializable {
     return WxMaGsonBuilder.create().fromJson(json, WxMaUserInfo.class);
   }
 
-  @Data
-  public static class Watermark {
-    private String timestamp;
-    private String appid;
-  }
 }

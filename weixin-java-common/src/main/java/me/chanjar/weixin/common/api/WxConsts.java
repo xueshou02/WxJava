@@ -1,7 +1,11 @@
 package me.chanjar.weixin.common.api;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static me.chanjar.weixin.common.error.WxMpErrorMsgEnum.*;
 
 /**
  * 微信开发所使用到的常量类.
@@ -9,6 +13,18 @@ import java.util.Map;
  * @author Daniel Qian & binarywang
  */
 public class WxConsts {
+  /**
+   * access_token 相关错误代码
+   * <pre>
+   * 发生以下情况时尝试刷新access_token
+   * 40001 获取access_token时AppSecret错误，或者access_token无效
+   * 42001 access_token超时
+   * 40014 不合法的access_token，请开发者认真比对access_token的有效性（如是否过期），或查看是否正在为恰当的公众号调用接口
+   * </pre>
+   */
+  public static final List<Integer> ACCESS_TOKEN_ERROR_CODES = Arrays.asList(CODE_40001.getCode(),
+    CODE_40014.getCode(), CODE_42001.getCode());
+
   /**
    * 微信推送过来的消息的类型，和发送给微信xml格式消息的消息类型.
    */
@@ -28,6 +44,8 @@ public class WxConsts {
     public static final String DEVICE_STATUS = "device_status";
     public static final String HARDWARE = "hardware";
     public static final String TRANSFER_CUSTOMER_SERVICE = "transfer_customer_service";
+    public static final String UPDATE_TASKCARD = "update_taskcard";
+    public static final String UPDATE_BUTTON = "update_button";
   }
 
   /**
@@ -103,6 +121,37 @@ public class WxConsts {
      * 小程序通知消息.
      */
     public static final String MINIPROGRAM_NOTICE = "miniprogram_notice";
+
+    /**
+     * 模板卡片消息.
+     */
+    public static final String TEMPLATE_CARD = "template_card";
+  }
+
+  /**
+   * 企业微信模板卡片消息的卡片类型
+   */
+  public static class TemplateCardType {
+    /**
+     * 文本通知型卡片
+     */
+    public static final String TEXT_NOTICE = "text_notice";
+    /**
+     * 图文展示型卡片
+     */
+    public static final String NEWS_NOTICE = "news_notice";
+    /**
+     * 按钮交互型卡片
+     */
+    public static final String BUTTON_INTERACTION = "button_interaction";
+    /**
+     * 投票选择型卡片
+     */
+    public static final String VOTE_INTERACTION = "vote_interaction";
+    /**
+     * 多项选择型卡片
+     */
+    public static final String MULTIPLE_INTERACTION = "multiple_interaction";
   }
 
   /**
@@ -139,6 +188,12 @@ public class WxConsts {
     public static final String ERR_20013 = "err(20013)";
     public static final String ERR_22000 = "err(22000)";
     public static final String ERR_21000 = "err(21000)";
+    public static final String ERR_30001 = "err(30001)";
+    public static final String ERR_30002 = "err(30002)";
+    public static final String ERR_30003 = "err(30003)";
+    public static final String ERR_40001 = "err(40001)";
+    public static final String ERR_40002 = "err(40002)";
+
 
     /**
      * 群发反馈消息代码所对应的文字描述.
@@ -157,6 +212,11 @@ public class WxConsts {
       STATUS_DESC.put(ERR_20013, "涉嫌版权");
       STATUS_DESC.put(ERR_22000, "涉嫌互推_互相宣传");
       STATUS_DESC.put(ERR_21000, "涉嫌其他");
+      STATUS_DESC.put(ERR_30001, "原创校验出现系统错误且用户选择了被判为转载就不群发");
+      STATUS_DESC.put(ERR_30002, "原创校验被判定为不能群发");
+      STATUS_DESC.put(ERR_30003, "原创校验被判定为转载文且用户选择了被判为转载就不群发");
+      STATUS_DESC.put(ERR_40001, "管理员拒绝");
+      STATUS_DESC.put(ERR_40002, "管理员30分钟内无响应，超时");
     }
   }
 
@@ -394,5 +454,17 @@ public class WxConsts {
     public static final String OPERATORDEFAULT = "DEFAULT";
   }
 
-
+  /**
+   * appId 类型
+   */
+  public static class AppIdType {
+    /**
+     * 公众号appId类型
+     */
+    public static final String MP_TYPE = "mp";
+    /**
+     * 小程序appId类型
+     */
+    public static final String MINI_TYPE = "mini";
+  }
 }

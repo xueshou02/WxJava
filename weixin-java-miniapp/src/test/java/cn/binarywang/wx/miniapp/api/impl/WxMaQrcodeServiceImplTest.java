@@ -52,7 +52,25 @@ public class WxMaQrcodeServiceImplTest {
 
   @Test
   public void testCreateWxaCodeUnlimitBytes() throws WxErrorException {
-    final byte[] wxCode = this.wxService.getQrcodeService().createWxaCodeUnlimitBytes("111", null, 122, true, null, false);
+    final byte[] wxCode = this.wxService.getQrcodeService().createWxaCodeUnlimitBytes("111", null, "trial", 122, true, null, false);
+    assertThat(wxCode).isNotNull();
+  }
+
+  @Test
+  public void testCreateQrcodeByFile() throws WxErrorException {
+    final File qrCode = this.wxService.getQrcodeService().createQrcode("111", "/opt/logs");
+    assertThat(qrCode).isNotNull();
+  }
+
+  @Test
+  public void testCreateWxaCodeByFile() throws WxErrorException {
+    final File wxCode = this.wxService.getQrcodeService().createWxaCode("111", "/opt/logs");
+    assertThat(wxCode).isNotNull();
+  }
+
+  @Test
+  public void testCreateQrcodeUnlimitByFile() throws WxErrorException {
+    final File wxCode = this.wxService.getQrcodeService().createWxaCodeUnlimit("111",null,"/opt/logs");
     assertThat(wxCode).isNotNull();
   }
 }

@@ -10,6 +10,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import me.chanjar.weixin.common.annotation.Required;
 
+import java.util.Map;
+
 /**
  * <pre>
  *  企业付款到银行卡的请求对象类
@@ -108,7 +110,6 @@ public class EntPayBankRequest extends BaseWxPayRequest {
    * 描述：企业付款到银行卡付款说明,即订单备注（UTF8编码，允许100个字符以内）
    * </pre>
    */
-  @Required
   @XStreamAlias("desc")
   private String description;
 
@@ -119,6 +120,16 @@ public class EntPayBankRequest extends BaseWxPayRequest {
   @Override
   protected String[] getIgnoredParamsForSign() {
     return new String[]{"sign_type"};
+  }
+
+  @Override
+  protected void storeMap(Map<String, String> map) {
+    map.put("partner_trade_no", partnerTradeNo);
+    map.put("enc_bank_no", encBankNo);
+    map.put("enc_true_name", encTrueName);
+    map.put("bank_code", bankCode);
+    map.put("amount", amount.toString());
+    map.put("desc", description);
   }
 
   @Override

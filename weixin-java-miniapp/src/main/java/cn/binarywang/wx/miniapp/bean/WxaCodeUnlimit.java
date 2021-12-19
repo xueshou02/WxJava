@@ -1,6 +1,6 @@
 package cn.binarywang.wx.miniapp.bean;
 
-import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
+import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +19,9 @@ public class WxaCodeUnlimit extends AbstractWxMaQrcodeWrapper implements Seriali
   private static final long serialVersionUID = 4782193774524960401L;
   private String scene;
   private String page;
+
+  @SerializedName("env_version")
+  private String envVersion = "release";
 
   private int width = 430;
 

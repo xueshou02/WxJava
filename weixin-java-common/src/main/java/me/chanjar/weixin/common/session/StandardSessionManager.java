@@ -1,13 +1,12 @@
 package me.chanjar.weixin.common.session;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import me.chanjar.weixin.common.util.res.StringManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import me.chanjar.weixin.common.util.res.StringManager;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 基于内存的session manager.
@@ -15,7 +14,6 @@ import me.chanjar.weixin.common.util.res.StringManager;
  * @author Daniel Qian
  */
 public class StandardSessionManager implements WxSessionManager, InternalSessionManager {
-
   protected static final StringManager SM = StringManager.getManager(Constants.PACKAGE);
   /**
    * The descriptive name of this Manager implementation (for logging).
@@ -51,7 +49,9 @@ public class StandardSessionManager implements WxSessionManager, InternalSession
    */
   protected int maxInactiveInterval = 30 * 60;
 
-  // Number of sessions created by this manager
+  /**
+   * Number of sessions created by this manager
+   */
   protected long sessionCounter = 0;
 
   protected volatile int maxActive = 0;
@@ -98,7 +98,7 @@ public class StandardSessionManager implements WxSessionManager, InternalSession
 
     // Create a new session if requested and the response is not committed
     if (!create) {
-      return (null);
+      return null;
     }
 
     session = createSession(sessionId);
@@ -127,7 +127,7 @@ public class StandardSessionManager implements WxSessionManager, InternalSession
   @Override
   public InternalSession findSession(String id) {
     if (id == null) {
-      return (null);
+      return null;
     }
     return this.sessions.get(id);
   }
@@ -154,12 +154,10 @@ public class StandardSessionManager implements WxSessionManager, InternalSession
     session.setValid(true);
     session.setCreationTime(System.currentTimeMillis());
     session.setMaxInactiveInterval(this.maxInactiveInterval);
-    String id = sessionId;
-    session.setId(id);
+    session.setId(sessionId);
     this.sessionCounter++;
 
-    return (session);
-
+    return session;
   }
 
 
@@ -181,24 +179,19 @@ public class StandardSessionManager implements WxSessionManager, InternalSession
     return new StandardSession(this);
   }
 
-
   @Override
   public void add(InternalSession session) {
-
     // 当第一次有session创建的时候，开启session清理线程
     if (!this.backgroundProcessStarted.getAndSet(true)) {
-      Thread t = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          while (true) {
-            try {
-              // 每秒清理一次
-              Thread.sleep(StandardSessionManager.this.backgroundProcessorDelay * 1000L);
-              backgroundProcess();
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-              StandardSessionManager.this.log.error("SessionManagerImpl.backgroundProcess error", e);
-            }
+      Thread t = new Thread(() -> {
+        while (true) {
+          try {
+            // 每秒清理一次
+            Thread.sleep(StandardSessionManager.this.backgroundProcessorDelay * 1000L);
+            backgroundProcess();
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            StandardSessionManager.this.log.error("SessionManagerImpl.backgroundProcess error", e);
           }
         }
       });
@@ -258,7 +251,7 @@ public class StandardSessionManager implements WxSessionManager, InternalSession
     if (this.log.isDebugEnabled()) {
       this.log.debug("End expire sessions {} processingTime {} expired sessions: {}", getName(), timeEnd - timeNow, expireHere);
     }
-    this.processingTime += (timeEnd - timeNow);
+    this.processingTime += timeEnd - timeNow;
 
   }
 
@@ -296,7 +289,7 @@ public class StandardSessionManager implements WxSessionManager, InternalSession
    */
   public String getName() {
 
-    return (name);
+    return name;
 
   }
 

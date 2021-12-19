@@ -1,8 +1,9 @@
 package me.chanjar.weixin.common.util.http.apache;
 
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
-import org.apache.http.annotation.NotThreadSafe;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -11,6 +12,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -23,9 +25,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContexts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -41,26 +42,71 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author kakotor
  */
+@Slf4j
+@Data
 @NotThreadSafe
 public class DefaultApacheHttpClientBuilder implements ApacheHttpClientBuilder {
-  protected final Logger log = LoggerFactory.getLogger(DefaultApacheHttpClientBuilder.class);
   private final AtomicBoolean prepared = new AtomicBoolean(false);
-  private int connectionRequestTimeout = 3000;
+
+  /**
+   * 获取链接的超时时间设置
+   * <p>
+   * 设置为零时不超时,一直等待.
+   * 设置为负数是使用系统默认设置(非3000ms的默认值,而是httpClient的默认设置).
+   * </p>
+   */
+  private int connectionRequestTimeout = -1;
+
+  /**
+   * 建立链接的超时时间,默认为5000ms.由于是在链接池获取链接,此设置应该并不起什么作用
+   * <p>
+   * 设置为零时不超时,一直等待.
+   * 设置为负数是使用系统默认设置(非上述的5000ms的默认值,而是httpclient的默认设置).
+   * </p>
+   */
   private int connectionTimeout = 5000;
+  /**
+   * 默认NIO的socket超时设置,默认5000ms.
+   */
   private int soTimeout = 5000;
+  /**
+   * 空闲链接的超时时间,默认60000ms.
+   * <p>
+   * 超时的链接将在下一次空闲链接检查是被销毁
+   * </p>
+   */
   private int idleConnTimeout = 60000;
+  /**
+   * 检查空间链接的间隔周期,默认60000ms.
+   */
   private int checkWaitTime = 60000;
+  /**
+   * 每路的最大链接数,默认10
+   */
   private int maxConnPerHost = 10;
+  /**
+   * 最大总连接数,默认50
+   */
   private int maxTotalConn = 50;
+  /**
+   * 自定义httpclient的User Agent
+   */
   private String userAgent;
-  private HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
-    @Override
-    public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
-      return false;
-    }
-  };
+
+  /**
+   * 自定义重试策略
+   */
+  private HttpRequestRetryHandler httpRequestRetryHandler;
+
+  /**
+   * 自定义KeepAlive策略
+   */
+  private ConnectionKeepAliveStrategy connectionKeepAliveStrategy;
+
+  private final HttpRequestRetryHandler defaultHttpRequestRetryHandler = (exception, executionCount, context) -> false;
+
   private SSLConnectionSocketFactory sslConnectionSocketFactory = SSLConnectionSocketFactory.getSocketFactory();
-  private PlainConnectionSocketFactory plainConnectionSocketFactory = PlainConnectionSocketFactory.getSocketFactory();
+  private final PlainConnectionSocketFactory plainConnectionSocketFactory = PlainConnectionSocketFactory.getSocketFactory();
   private String httpProxyHost;
   private int httpProxyPort;
   private String httpProxyUsername;
@@ -106,93 +152,21 @@ public class DefaultApacheHttpClientBuilder implements ApacheHttpClientBuilder {
   }
 
   @Override
-  public ApacheHttpClientBuilder sslConnectionSocketFactory(SSLConnectionSocketFactory sslConnectionSocketFactory) {
-    this.sslConnectionSocketFactory = sslConnectionSocketFactory;
+  public ApacheHttpClientBuilder httpRequestRetryHandler(HttpRequestRetryHandler httpRequestRetryHandler) {
+    this.httpRequestRetryHandler = httpRequestRetryHandler;
     return this;
   }
 
-  /**
-   * 获取链接的超时时间设置,默认3000ms
-   * <p>
-   * 设置为零时不超时,一直等待.
-   * 设置为负数是使用系统默认设置(非上述的3000ms的默认值,而是httpclient的默认设置).
-   * </p>
-   *
-   * @param connectionRequestTimeout 获取链接的超时时间设置(单位毫秒),默认3000ms
-   */
-  public void setConnectionRequestTimeout(int connectionRequestTimeout) {
-    this.connectionRequestTimeout = connectionRequestTimeout;
+  @Override
+  public ApacheHttpClientBuilder keepAliveStrategy(ConnectionKeepAliveStrategy keepAliveStrategy) {
+    this.connectionKeepAliveStrategy = keepAliveStrategy;
+    return this;
   }
 
-  /**
-   * 建立链接的超时时间,默认为5000ms.由于是在链接池获取链接,此设置应该并不起什么作用
-   * <p>
-   * 设置为零时不超时,一直等待.
-   * 设置为负数是使用系统默认设置(非上述的5000ms的默认值,而是httpclient的默认设置).
-   * </p>
-   *
-   * @param connectionTimeout 建立链接的超时时间设置(单位毫秒),默认5000ms
-   */
-  public void setConnectionTimeout(int connectionTimeout) {
-    this.connectionTimeout = connectionTimeout;
-  }
-
-  /**
-   * 默认NIO的socket超时设置,默认5000ms.
-   *
-   * @param soTimeout 默认NIO的socket超时设置,默认5000ms.
-   * @see java.net.SocketOptions#SO_TIMEOUT
-   */
-  public void setSoTimeout(int soTimeout) {
-    this.soTimeout = soTimeout;
-  }
-
-  /**
-   * 空闲链接的超时时间,默认60000ms.
-   * <p>
-   * 超时的链接将在下一次空闲链接检查是被销毁
-   * </p>
-   *
-   * @param idleConnTimeout 空闲链接的超时时间,默认60000ms.
-   */
-  public void setIdleConnTimeout(int idleConnTimeout) {
-    this.idleConnTimeout = idleConnTimeout;
-  }
-
-  /**
-   * 检查空间链接的间隔周期,默认60000ms.
-   *
-   * @param checkWaitTime 检查空间链接的间隔周期,默认60000ms.
-   */
-  public void setCheckWaitTime(int checkWaitTime) {
-    this.checkWaitTime = checkWaitTime;
-  }
-
-  /**
-   * 每路的最大链接数,默认10
-   *
-   * @param maxConnPerHost 每路的最大链接数,默认10
-   */
-  public void setMaxConnPerHost(int maxConnPerHost) {
-    this.maxConnPerHost = maxConnPerHost;
-  }
-
-  /**
-   * 最大总连接数,默认50
-   *
-   * @param maxTotalConn 最大总连接数,默认50
-   */
-  public void setMaxTotalConn(int maxTotalConn) {
-    this.maxTotalConn = maxTotalConn;
-  }
-
-  /**
-   * 自定义httpclient的User Agent
-   *
-   * @param userAgent User Agent
-   */
-  public void setUserAgent(String userAgent) {
-    this.userAgent = userAgent;
+  @Override
+  public ApacheHttpClientBuilder sslConnectionSocketFactory(SSLConnectionSocketFactory sslConnectionSocketFactory) {
+    this.sslConnectionSocketFactory = sslConnectionSocketFactory;
+    return this;
   }
 
   public IdleConnectionMonitorThread getIdleConnectionMonitorThread() {
@@ -232,7 +206,16 @@ public class DefaultApacheHttpClientBuilder implements ApacheHttpClientBuilder {
         .setConnectTimeout(this.connectionTimeout)
         .setConnectionRequestTimeout(this.connectionRequestTimeout)
         .build()
-      ).setRetryHandler(this.httpRequestRetryHandler);
+      );
+
+    // 设置重试策略，没有则使用默认
+    httpRequestRetryHandler = httpRequestRetryHandler == null ? defaultHttpRequestRetryHandler : httpRequestRetryHandler;
+    httpClientBuilder.setRetryHandler(httpRequestRetryHandler);
+
+    // 设置KeepAliveStrategy，没有使用默认
+    if (connectionKeepAliveStrategy != null) {
+      httpClientBuilder.setKeepAliveStrategy(connectionKeepAliveStrategy);
+    }
 
     if (StringUtils.isNotBlank(this.httpProxyHost) && StringUtils.isNotBlank(this.httpProxyUsername)) {
       // 使用代理服务器 需要用户认证的代理服务器
@@ -268,7 +251,7 @@ public class DefaultApacheHttpClientBuilder implements ApacheHttpClientBuilder {
         null,
         SSLConnectionSocketFactory.getDefaultHostnameVerifier());
     } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-      this.log.error(e.getMessage(), e);
+      log.error("构建SSL连接工厂时发生异常！", e);
     }
 
     return null;

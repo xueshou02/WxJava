@@ -12,6 +12,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.io.BaseEncoding;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import me.chanjar.weixin.common.error.WxRuntimeException;
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,19 +38,16 @@ public class WxCryptUtil {
   private static final Base64 BASE64 = new Base64();
   private static final Charset CHARSET = StandardCharsets.UTF_8;
 
-  private static final ThreadLocal<DocumentBuilder> BUILDER_LOCAL = new ThreadLocal<DocumentBuilder>() {
-    @Override
-    protected DocumentBuilder initialValue() {
-      try {
-        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setExpandEntityReferences(false);
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        return factory.newDocumentBuilder();
-      } catch (ParserConfigurationException exc) {
-        throw new IllegalArgumentException(exc);
-      }
+  private static final ThreadLocal<DocumentBuilder> BUILDER_LOCAL = ThreadLocal.withInitial(() -> {
+    try {
+      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setExpandEntityReferences(false);
+      factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+      return factory.newDocumentBuilder();
+    } catch (ParserConfigurationException exc) {
+      throw new IllegalArgumentException(exc);
     }
-  };
+  });
 
   protected byte[] aesKey;
   protected String token;
@@ -64,7 +66,7 @@ public class WxCryptUtil {
   public WxCryptUtil(String token, String encodingAesKey, String appidOrCorpid) {
     this.token = token;
     this.appidOrCorpid = appidOrCorpid;
-    this.aesKey = Base64.decodeBase64(encodingAesKey + "=");
+    this.aesKey = Base64.decodeBase64(CharMatcher.whitespace().removeFrom(encodingAesKey));
   }
 
   private static String extractEncryptPart(String xml) {
@@ -75,7 +77,7 @@ public class WxCryptUtil {
       Element root = document.getDocumentElement();
       return root.getElementsByTagName("Encrypt").item(0).getTextContent();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WxRuntimeException(e);
     }
   }
 
@@ -158,12 +160,35 @@ public class WxCryptUtil {
   }
 
   /**
+   * 将公众平台回复用户的消息加密打包.
+   * <ol>
+   * <li>对要发送的消息进行AES-CBC加密</li>
+   * <li>生成安全签名</li>
+   * <li>将消息密文和安全签名打包成xml格式</li>
+   * </ol>
+   *
+   * @param plainText 公众平台待回复用户的消息，xml格式的字符串
+   * @return 加密消息所需的值对象
+   */
+  public EncryptContext encryptContext(String plainText) {
+    // 加密
+    String encryptedXml = encrypt(genRandomStr(), plainText);
+
+    // 生成安全签名
+    String timeStamp = Long.toString(System.currentTimeMillis() / 1000L);
+    String nonce = genRandomStr();
+
+    String signature = SHA1.gen(this.token, timeStamp, nonce, encryptedXml);
+    return new EncryptContext(encryptedXml, signature, timeStamp, nonce);
+  }
+
+  /**
    * 对明文进行加密.
    *
    * @param plainText 需要加密的明文
    * @return 加密后base64编码的字符串
    */
-  protected String encrypt(String randomStr, String plainText) {
+  public String encrypt(String randomStr, String plainText) {
     ByteGroup byteCollector = new ByteGroup();
     byte[] randomStringBytes = randomStr.getBytes(CHARSET);
     byte[] plainTextBytes = plainText.getBytes(CHARSET);
@@ -196,7 +221,7 @@ public class WxCryptUtil {
       // 使用BASE64对加密后的字符串进行编码
       return BASE64.encodeToString(encrypted);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WxRuntimeException(e);
     }
   }
 
@@ -211,22 +236,58 @@ public class WxCryptUtil {
    * @param msgSignature 签名串，对应URL参数的msg_signature
    * @param timeStamp    时间戳，对应URL参数的timestamp
    * @param nonce        随机串，对应URL参数的nonce
-   * @param encryptedXml 密文，对应POST请求的数据
+   * @param encryptedXml 包含 Encrypt 密文的 xml，对应POST请求的数据
    * @return 解密后的原文
    */
-  public String decrypt(String msgSignature, String timeStamp, String nonce, String encryptedXml) {
+  public String decryptXml(String msgSignature, String timeStamp, String nonce, String encryptedXml) {
     // 密钥，公众账号的app corpSecret
     // 提取密文
     String cipherText = extractEncryptPart(encryptedXml);
+    return decryptContent(msgSignature, timeStamp, nonce, cipherText);
+  }
 
+  /**
+   * 检验消息的真实性，并且获取解密后的明文.
+   * <ol>
+   * <li>利用收到的密文生成安全签名，进行签名验证</li>
+   * <li>若验证通过，则提取xml中的加密消息</li>
+   * <li>对消息进行解密</li>
+   * </ol>
+   *
+   * @param msgSignature 签名串，对应URL参数的msg_signature
+   * @param timeStamp    时间戳，对应URL参数的timestamp
+   * @param nonce        随机串，对应URL参数的nonce
+   * @param encryptedXml 包含 Encrypt 密文的 xml，对应POST请求的数据
+   * @return 解密后的原文
+   * @deprecated 由于语义不清晰，置为过时方法，请查看替代方法 {@link #decryptXml}
+   */
+  @Deprecated
+  public String decrypt(String msgSignature, String timeStamp, String nonce, String encryptedXml) {
+    return decryptXml(msgSignature, timeStamp, nonce, encryptedXml);
+  }
+
+  /**
+   * 检验消息的真实性，并且获取解密后的明文.
+   * <ol>
+   * <li>利用收到的密文生成安全签名，进行签名验证</li>
+   * <li>若验证通过，则提取xml中的加密消息</li>
+   * <li>对消息进行解密</li>
+   * </ol>
+   *
+   * @param msgSignature     签名串，对应URL参数的msg_signature
+   * @param timeStamp        时间戳，对应URL参数的timestamp
+   * @param nonce            随机串，对应URL参数的nonce
+   * @param encryptedContent 加密文本体
+   * @return 解密后的原文
+   */
+  public String decryptContent(String msgSignature, String timeStamp, String nonce, String encryptedContent) {
     // 验证安全签名
-    String signature = SHA1.gen(this.token, timeStamp, nonce, cipherText);
+    String signature = SHA1.gen(this.token, timeStamp, nonce, encryptedContent);
     if (!signature.equals(msgSignature)) {
-      throw new RuntimeException("加密消息签名校验失败");
+      throw new WxRuntimeException("加密消息签名校验失败");
     }
-
     // 解密
-    return decrypt(cipherText);
+    return decrypt(encryptedContent);
   }
 
   /**
@@ -250,7 +311,7 @@ public class WxCryptUtil {
       // 解密
       original = cipher.doFinal(encrypted);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WxRuntimeException(e);
     }
 
     String xmlContent;
@@ -267,16 +328,24 @@ public class WxCryptUtil {
       xmlContent = new String(Arrays.copyOfRange(bytes, 20, 20 + xmlLength), CHARSET);
       fromAppid = new String(Arrays.copyOfRange(bytes, 20 + xmlLength, bytes.length), CHARSET);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WxRuntimeException(e);
     }
 
     // appid不相同的情况 暂时忽略这段判断
-//    if (!fromAppid.equals(this.appidOrCorpid)) {
-//      throw new RuntimeException("AppID不正确，请核实！");
-//    }
+    //    if (!fromAppid.equals(this.appidOrCorpid)) {
+    //      throw new WxRuntimeException("AppID不正确，请核实！");
+    //    }
 
     return xmlContent;
 
   }
 
+  @Data
+  @AllArgsConstructor
+  public static class EncryptContext {
+    private String encrypt;
+    private String signature;
+    private String timeStamp;
+    private String nonce;
+  }
 }

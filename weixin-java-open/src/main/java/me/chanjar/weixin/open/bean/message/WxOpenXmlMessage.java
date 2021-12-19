@@ -4,6 +4,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxRuntimeException;
 import me.chanjar.weixin.common.util.xml.XStreamCDataConverter;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
@@ -101,6 +102,21 @@ public class WxOpenXmlMessage implements Serializable {
     @XStreamAlias("component_phone")
     @XStreamConverter(value = XStreamCDataConverter.class)
     private String componentPhone;
+
+    // 创建个人小程序审核通知数据
+    @XStreamAlias("wxuser")
+    @XStreamConverter(value = XStreamCDataConverter.class)
+    private String wxuser;
+
+    @XStreamAlias("idname")
+    @XStreamConverter(value = XStreamCDataConverter.class)
+    private String idname;
+
+    // 创建试用小程序成功/失败的通知数据
+    @XStreamAlias("unique_id")
+    @XStreamConverter(value = XStreamCDataConverter.class)
+    private String uniqueId;
+
   }
 
   public static String wxMpOutXmlMessageToEncryptedXml(WxMpXmlOutMessage message, WxOpenConfigStorage wxOpenConfigStorage) {
@@ -131,7 +147,7 @@ public class WxOpenXmlMessage implements Serializable {
   public static WxOpenXmlMessage fromEncryptedXml(String encryptedXml, WxOpenConfigStorage wxOpenConfigStorage,
                                                   String timestamp, String nonce, String msgSignature) {
     WxOpenCryptUtil cryptUtil = new WxOpenCryptUtil(wxOpenConfigStorage);
-    String plainText = cryptUtil.decrypt(msgSignature, timestamp, nonce, encryptedXml);
+    String plainText = cryptUtil.decryptXml(msgSignature, timestamp, nonce, encryptedXml);
     log.debug("解密后的原始xml消息内容：{}", plainText);
     return fromXml(plainText);
   }
@@ -139,7 +155,7 @@ public class WxOpenXmlMessage implements Serializable {
   public static WxMpXmlMessage fromEncryptedMpXml(String encryptedXml, WxOpenConfigStorage wxOpenConfigStorage,
                                                   String timestamp, String nonce, String msgSignature) {
     WxOpenCryptUtil cryptUtil = new WxOpenCryptUtil(wxOpenConfigStorage);
-    String plainText = cryptUtil.decrypt(msgSignature, timestamp, nonce, encryptedXml);
+    String plainText = cryptUtil.decryptXml(msgSignature, timestamp, nonce, encryptedXml);
     return WxMpXmlMessage.fromXml(plainText);
   }
 
@@ -149,7 +165,7 @@ public class WxOpenXmlMessage implements Serializable {
       return fromEncryptedXml(IOUtils.toString(is, StandardCharsets.UTF_8),
         wxOpenConfigStorage, timestamp, nonce, msgSignature);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new WxRuntimeException(e);
     }
   }
 }

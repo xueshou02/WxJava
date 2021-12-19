@@ -9,11 +9,12 @@ import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.RandomUtils;
 import me.chanjar.weixin.common.util.http.SimpleGetRequestExecutor;
+import me.chanjar.weixin.common.util.json.GsonParser;
 import me.chanjar.weixin.common.util.json.WxGsonBuilder;
 import me.chanjar.weixin.mp.api.WxMpCardService;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.card.*;
-import me.chanjar.weixin.mp.enums.TicketType;
+import me.chanjar.weixin.common.enums.TicketType;
 import me.chanjar.weixin.mp.enums.WxMpApiUrl;
 import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -47,25 +48,26 @@ public class WxMpCardServiceImpl implements WxMpCardService {
   @Override
   public String getCardApiTicket(boolean forceRefresh) throws WxErrorException {
     final TicketType type = TicketType.WX_CARD;
-    Lock lock = getWxMpService().getWxMpConfigStorage().getTicketLock(type);
-    try {
+
+    if (forceRefresh) {
+      this.getWxMpService().getWxMpConfigStorage().expireTicket(type);
+    }
+
+    if (this.getWxMpService().getWxMpConfigStorage().isTicketExpired(type)) {
+      Lock lock = getWxMpService().getWxMpConfigStorage().getTicketLock(type);
       lock.lock();
-
-      if (forceRefresh) {
-        this.getWxMpService().getWxMpConfigStorage().expireTicket(type);
+      try {
+        if (this.getWxMpService().getWxMpConfigStorage().isTicketExpired(type)) {
+          String responseContent = this.wxMpService.execute(SimpleGetRequestExecutor
+            .create(this.getWxMpService().getRequestHttp()), WxMpApiUrl.Card.CARD_GET_TICKET, null);
+          JsonObject tmpJsonObject = GsonParser.parse(responseContent);
+          String cardApiTicket = tmpJsonObject.get("ticket").getAsString();
+          int expiresInSeconds = tmpJsonObject.get("expires_in").getAsInt();
+          this.getWxMpService().getWxMpConfigStorage().updateTicket(type, cardApiTicket, expiresInSeconds);
+        }
+      } finally {
+        lock.unlock();
       }
-
-      if (this.getWxMpService().getWxMpConfigStorage().isTicketExpired(type)) {
-        String responseContent = this.wxMpService.execute(SimpleGetRequestExecutor
-          .create(this.getWxMpService().getRequestHttp()), WxMpApiUrl.Card.CARD_GET_TICKET, null);
-        JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
-        JsonObject tmpJsonObject = tmpJsonElement.getAsJsonObject();
-        String cardApiTicket = tmpJsonObject.get("ticket").getAsString();
-        int expiresInSeconds = tmpJsonObject.get("expires_in").getAsInt();
-        this.getWxMpService().getWxMpConfigStorage().updateTicket(type, cardApiTicket, expiresInSeconds);
-      }
-    } finally {
-      lock.unlock();
     }
     return this.getWxMpService().getWxMpConfigStorage().getTicket(type);
   }
@@ -81,6 +83,7 @@ public class WxMpCardServiceImpl implements WxMpCardService {
     signParams[optionalSignParam.length + 1] = nonceStr;
     signParams[optionalSignParam.length + 2] = cardApiTicket;
     StringBuilder sb = new StringBuilder();
+    Arrays.sort(signParams);
     for (String a : signParams) {
       sb.append(a);
     }
@@ -98,8 +101,7 @@ public class WxMpCardServiceImpl implements WxMpCardService {
     JsonObject param = new JsonObject();
     param.addProperty("encrypt_code", encryptCode);
     String responseContent = this.wxMpService.post(WxMpApiUrl.Card.CARD_CODE_DECRYPT, param.toString());
-    JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
-    JsonObject tmpJsonObject = tmpJsonElement.getAsJsonObject();
+    JsonObject tmpJsonObject = GsonParser.parse(responseContent);
     JsonPrimitive jsonPrimitive = tmpJsonObject.getAsJsonPrimitive("code");
     return jsonPrimitive.getAsString();
   }
@@ -158,7 +160,7 @@ public class WxMpCardServiceImpl implements WxMpCardService {
     String responseContent = this.wxMpService.post(WxMpApiUrl.Card.CARD_GET, param.toString());
 
     // 判断返回值
-    JsonObject json = (new JsonParser()).parse(responseContent).getAsJsonObject();
+    JsonObject json = GsonParser.parse(responseContent);
     String errcode = json.get("errcode").getAsString();
     if (!"0".equals(errcode)) {
       String errmsg = json.get("errmsg").getAsString();
@@ -348,6 +350,16 @@ public class WxMpCardServiceImpl implements WxMpCardService {
     param.addProperty("need_verify_cod", needVerifyCod);
     param.addProperty("need_remark_amount", needRemarkAmount);
     this.wxMpService.post(WxMpApiUrl.Card.CARD_SELF_CONSUME_CELL_SET, param.toString());
+  }
+
+
+  @Override
+  public WxUserCardListResult getUserCardList(String openId, String cardId) throws WxErrorException {
+    JsonObject param = new JsonObject();
+    param.addProperty("openid", openId);
+    param.addProperty("card_id", cardId);
+    String response = this.wxMpService.post(WxMpApiUrl.Card.CARD_USER_CARD_LIST, param.toString());
+    return WxUserCardListResult.fromJson(response);
   }
 
 

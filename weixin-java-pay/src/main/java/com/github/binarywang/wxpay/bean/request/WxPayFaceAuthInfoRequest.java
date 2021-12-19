@@ -2,7 +2,10 @@ package com.github.binarywang.wxpay.bean.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.*;
+import lombok.experimental.Accessors;
 import me.chanjar.weixin.common.annotation.Required;
+
+import java.util.Map;
 
 /**
  * <pre>
@@ -14,12 +17,14 @@ import me.chanjar.weixin.common.annotation.Required;
  * @author <a href="https://github.com/jmdhappy/xxpay-master">XxPay</a>
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @Builder(builderMethodName = "newBuilder")
 @NoArgsConstructor
 @AllArgsConstructor
 @XStreamAlias("xml")
 public class WxPayFaceAuthInfoRequest extends BaseWxPayRequest {
+  private static final long serialVersionUID = -2909189635374300870L;
 
   /**
    * <pre>
@@ -121,6 +126,17 @@ public class WxPayFaceAuthInfoRequest extends BaseWxPayRequest {
   @Override
   protected void checkConstraints() {
     //do nothing
+  }
+
+  @Override
+  protected void storeMap(Map<String, String> map) {
+    map.put("now", now);
+    map.put("version", version);
+    map.put("rawdata", rawdata);
+    map.put("store_id", storeId);
+    map.put("store_name", storeName);
+    map.put("device_id", deviceId);
+    map.put("attach", attach);
   }
 
 }

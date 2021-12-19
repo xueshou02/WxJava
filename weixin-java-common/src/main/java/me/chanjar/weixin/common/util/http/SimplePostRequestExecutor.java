@@ -1,15 +1,16 @@
 package me.chanjar.weixin.common.util.http;
 
-import java.io.IOException;
-
-import me.chanjar.weixin.common.WxType;
+import me.chanjar.weixin.common.enums.WxType;
+import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.apache.ApacheSimplePostRequestExecutor;
 import me.chanjar.weixin.common.util.http.jodd.JoddHttpSimplePostRequestExecutor;
 import me.chanjar.weixin.common.util.http.okhttp.OkHttpSimplePostRequestExecutor;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 
 /**
- * 用装饰模式实现
  * 简单的POST请求执行器，请求的参数是String, 返回的结果也是String
  *
  * @author Daniel Qian
@@ -40,4 +41,21 @@ public abstract class SimplePostRequestExecutor<H, P> implements RequestExecutor
     }
   }
 
+  @NotNull
+  public String handleResponse(WxType wxType, String responseContent) throws WxErrorException {
+    if (responseContent.isEmpty()) {
+      throw new WxErrorException("无响应内容");
+    }
+
+    if (responseContent.startsWith("<xml>")) {
+      //xml格式输出直接返回
+      return responseContent;
+    }
+
+    WxError error = WxError.fromJson(responseContent, wxType);
+    if (error.getErrorCode() != 0) {
+      throw new WxErrorException(error);
+    }
+    return responseContent;
+  }
 }

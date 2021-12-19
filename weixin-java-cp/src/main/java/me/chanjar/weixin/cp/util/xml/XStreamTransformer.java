@@ -6,15 +6,8 @@ import java.util.Map;
 
 import com.thoughtworks.xstream.XStream;
 import me.chanjar.weixin.common.util.xml.XStreamInitializer;
-import me.chanjar.weixin.cp.bean.WxCpTpXmlMessage;
+import me.chanjar.weixin.cp.bean.message.*;
 import me.chanjar.weixin.cp.bean.WxCpTpXmlPackage;
-import me.chanjar.weixin.cp.bean.WxCpXmlMessage;
-import me.chanjar.weixin.cp.bean.WxCpXmlOutImageMessage;
-import me.chanjar.weixin.cp.bean.WxCpXmlOutMessage;
-import me.chanjar.weixin.cp.bean.WxCpXmlOutNewsMessage;
-import me.chanjar.weixin.cp.bean.WxCpXmlOutTextMessage;
-import me.chanjar.weixin.cp.bean.WxCpXmlOutVideoMessage;
-import me.chanjar.weixin.cp.bean.WxCpXmlOutVoiceMessage;
 
 public class XStreamTransformer {
 
@@ -60,6 +53,8 @@ public class XStreamTransformer {
     map.put(WxCpXmlOutImageMessage.class, configWxCpXmlOutImageMessage());
     map.put(WxCpXmlOutVideoMessage.class, configWxCpXmlOutVideoMessage());
     map.put(WxCpXmlOutVoiceMessage.class, configWxCpXmlOutVoiceMessage());
+    map.put(WxCpXmlOutTaskCardMessage.class, configWxCpXmlOutTaskCardMessage());
+    map.put(WxCpXmlOutUpdateBtnMessage.class, configWxCpXmlOutUpdateBtnMessage());
     map.put(WxCpTpXmlPackage.class, configWxCpTpXmlPackage());
     map.put(WxCpTpXmlMessage.class, configWxCpTpXmlMessage());
     return map;
@@ -117,18 +112,32 @@ public class XStreamTransformer {
     xstream.processAnnotations(WxCpXmlOutVoiceMessage.class);
     return xstream;
   }
-  
+
+  private static XStream configWxCpXmlOutTaskCardMessage() {
+    XStream xstream = XStreamInitializer.getInstance();
+
+    xstream.processAnnotations(WxCpXmlOutMessage.class);
+    xstream.processAnnotations(WxCpXmlOutTaskCardMessage.class);
+    return xstream;
+  }
+  private static XStream configWxCpXmlOutUpdateBtnMessage() {
+    XStream xstream = XStreamInitializer.getInstance();
+    xstream.processAnnotations(WxCpXmlOutMessage.class);
+    xstream.processAnnotations(WxCpXmlOutUpdateBtnMessage.class);
+    return xstream;
+  }
+
   private static XStream configWxCpTpXmlPackage() {
     XStream xstream = XStreamInitializer.getInstance();
     xstream.processAnnotations(WxCpTpXmlPackage.class);
-    
+
     return xstream;
   }
-  
+
   private static XStream configWxCpTpXmlMessage() {
     XStream xstream = XStreamInitializer.getInstance();
     xstream.processAnnotations(WxCpTpXmlMessage.class);
-    
+
     return xstream;
   }
 

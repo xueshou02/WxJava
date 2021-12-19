@@ -5,6 +5,9 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.w3c.dom.Document;
+
+import java.io.Serializable;
 
 /**
  * @author Wang GuangXin 2019/10/23 14:41
@@ -14,8 +17,21 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @XStreamAlias("xml")
-public class ProfitSharingReturnResult extends BaseWxPayResult {
+public class ProfitSharingReturnResult extends BaseWxPayResult implements Serializable {
   private static final long serialVersionUID = 718554909816994568L;
+
+  /**
+   * 如果返回状态码为FAIL，则本字段存在，且为失败的错误码.
+   */
+  @XStreamAlias("error_code")
+  private String errorCode;
+
+  /**
+   * 如果返回状态码为FAIL，则本字段存在，且为失败的错误信息.
+   */
+  @XStreamAlias("error_msg")
+  private String errorMsg;
+
   /**
    * 微信分账单号
    */
@@ -71,4 +87,29 @@ public class ProfitSharingReturnResult extends BaseWxPayResult {
    */
   @XStreamAlias("finish_time")
   private String finishTime;
+
+  @Override
+  protected void loadXml(Document d) {
+    orderId = readXmlString(d, "order_id");
+    outOrderNo = readXmlString(d, "out_order_no");
+    outReturnNo = readXmlString(d, "out_return_no");
+    returnNo = readXmlString(d, "return_no");
+    returnAccountType = readXmlString(d, "return_account_type");
+    returnAccount = readXmlString(d, "return_account");
+    returnAmount = readXmlInteger(d, "return_amount");
+    description = readXmlString(d, "description");
+    result = readXmlString(d, "result");
+    failReason = readXmlString(d, "fail_reason");
+    finishTime = readXmlString(d, "finish_time");
+  }
+
+  @Override
+  public String getErrCode() {
+    return this.errorCode;
+  }
+
+  @Override
+  public String getErrCodeDes() {
+    return this.errorMsg;
+  }
 }
