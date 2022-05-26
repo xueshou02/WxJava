@@ -49,6 +49,10 @@ public abstract class BaseWxCpServiceImpl<H, P> implements WxCpService, RequestH
   private WxCpTagService tagService = new WxCpTagServiceImpl(this);
   private WxCpAgentService agentService = new WxCpAgentServiceImpl(this);
   private WxCpOaService oaService = new WxCpOaServiceImpl(this);
+  private WxCpLivingService livingService = new WxCpLivingServiceImpl(this);
+  private WxCpOaAgentService oaAgentService = new WxCpOaAgentServiceImpl(this);
+  private WxCpOaWeDriveService oaWeDriveService = new WxCpOaWeDriveServiceImpl(this);
+  private WxCpMsgAuditService msgAuditService = new WxCpMsgAuditServiceImpl(this);
   private WxCpTaskCardService taskCardService = new WxCpTaskCardServiceImpl(this);
   private WxCpExternalContactService externalContactService = new WxCpExternalContactServiceImpl(this);
   private WxCpGroupRobotService groupRobotService = new WxCpGroupRobotServiceImpl(this);
@@ -56,6 +60,9 @@ public abstract class BaseWxCpServiceImpl<H, P> implements WxCpService, RequestH
   private WxCpOaCalendarService oaCalendarService = new WxCpOaCalendarServiceImpl(this);
   private WxCpOaScheduleService oaScheduleService = new WxCpOaOaScheduleServiceImpl(this);
   private WxCpAgentWorkBenchService workBenchService = new WxCpAgentWorkBenchServiceImpl(this);
+  private WxCpKfService kfService = new WxCpKfServiceImpl(this);
+
+  private WxCpExportService exportService = new WxCpExportServiceImpl(this);
 
   /**
    * 全局的是否正在刷新access token的锁.
@@ -405,6 +412,15 @@ public abstract class BaseWxCpServiceImpl<H, P> implements WxCpService, RequestH
   }
 
   @Override
+  public String syncUser(String mediaId) throws WxErrorException {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("media_id", mediaId);
+    String responseContent = post(this.configStorage.getApiUrl(BATCH_SYNC_USER), jsonObject.toString());
+    JsonObject tmpJson = GsonParser.parse(responseContent);
+    return tmpJson.get("jobid").getAsString();
+  }
+
+  @Override
   public String replaceUser(String mediaId) throws WxErrorException {
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("media_id", mediaId);
@@ -412,8 +428,8 @@ public abstract class BaseWxCpServiceImpl<H, P> implements WxCpService, RequestH
   }
 
   @Override
-  public String getTaskResult(String joinId) throws WxErrorException {
-    String url = this.configStorage.getApiUrl(BATCH_GET_RESULT + joinId);
+  public String getTaskResult(String jobId) throws WxErrorException {
+    String url = this.configStorage.getApiUrl(BATCH_GET_RESULT + jobId);
     return get(url, null);
   }
 
@@ -475,6 +491,26 @@ public abstract class BaseWxCpServiceImpl<H, P> implements WxCpService, RequestH
   @Override
   public WxCpOaService getOaService() {
     return oaService;
+  }
+
+  @Override
+  public WxCpLivingService getLivingService() {
+    return livingService;
+  }
+
+  @Override
+  public WxCpOaAgentService getOaAgentService() {
+    return oaAgentService;
+  }
+
+  @Override
+  public WxCpOaWeDriveService getOaWeDriveService() {
+    return oaWeDriveService;
+  }
+
+  @Override
+  public WxCpMsgAuditService getMsgAuditService() {
+    return msgAuditService;
   }
 
   @Override
@@ -549,5 +585,26 @@ public abstract class BaseWxCpServiceImpl<H, P> implements WxCpService, RequestH
   @Override
   public WxCpOaScheduleService getOaScheduleService() {
     return this.oaScheduleService;
+  }
+
+  @Override
+  public WxCpKfService getKfService() {
+    return kfService;
+  }
+
+  @Override
+  public void setKfService(WxCpKfService kfService) {
+    this.kfService = kfService;
+  }
+
+
+  @Override
+  public WxCpExportService getExportService() {
+    return exportService;
+  }
+
+  @Override
+  public void setExportService(WxCpExportService exportService) {
+    this.exportService = exportService;
   }
 }
