@@ -61,7 +61,7 @@ public class WxPayMultiServicesTest {
     assertEquals("2222222222", app2Config.getMchId());
     assertEquals("http://10.0.0.1:3128", app2Config.getApiHostUrl());
     assertEquals("/api-weixin", app2Config.getApiHostUrlPath());
-    assertEquals("22222222222222222222222222222222", app2Config.getApiv3Key());
+    assertEquals("22222222222222222222222222222222", app2Config.getApiV3Key());
   }
 
   @Test
