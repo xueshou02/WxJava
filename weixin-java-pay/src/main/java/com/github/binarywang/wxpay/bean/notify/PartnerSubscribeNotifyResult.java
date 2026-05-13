@@ -32,35 +32,74 @@ public class PartnerSubscribeNotifyResult implements Serializable,
   @NoArgsConstructor
   public static class DecryptNotifyResult implements Serializable {
     private static final long serialVersionUID = 1L;
+
     /**
-     * 商户号
+     * 消息内容
      */
-    @SerializedName("merchant_code")
-    private String merchantCode;
+    @SerializedName("message_content")
+    private MessageContent messageContent;
     /**
-     * 商户全称
+     * 主题名称
      */
-    @SerializedName("merchant_company_name")
-    private String merchantCompanyName;
+    @SerializedName("topic_name")
+    private TopicName topicName;
+
     /**
-     * 业务发生时间
+     * 消息内容
      */
-    @SerializedName("business_time")
-    private String businessTime;
+    @Data
+    @NoArgsConstructor
+    public static class MessageContent implements Serializable {
+      private static final long serialVersionUID = 1L;
+      /**
+       * 商户号
+       */
+      @SerializedName("merchant_code")
+      private String merchantCode;
+      /**
+       * 商户全称
+       */
+      @SerializedName("merchant_company_name")
+      private String merchantCompanyName;
+      /**
+       * 业务发生时间
+       */
+      @SerializedName("business_time")
+      private String businessTime;
+      /**
+       * 业务单据
+       */
+      @SerializedName("business_code")
+      private String businessCode;
+      /**
+       * 业务状态
+       */
+      @SerializedName("business_state")
+      private String businessState;
+      /**
+       * 备注
+       */
+      @SerializedName("remark")
+      private String remark;
+    }
+
     /**
-     * 业务单据
+     * 主题名称
      */
-    @SerializedName("business_code")
-    private String businessCode;
-    /**
-     * 业务状态
-     */
-    @SerializedName("business_state")
-    private String businessState;
-    /**
-     * 备注
-     */
-    @SerializedName("remark")
-    private String remark;
+    @Data
+    @NoArgsConstructor
+    public static class TopicName implements Serializable {
+      private static final long serialVersionUID = 1L;
+      /**
+       * 主题英文名
+       */
+      @SerializedName("topic_english_name")
+      private String topicEnglishName;
+      /**
+       * 主题中文名
+       */
+      @SerializedName("topic_chinese_name")
+      private String topicChineseName;
+    }
   }
 }
