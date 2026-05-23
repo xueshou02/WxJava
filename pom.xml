@@ -221,13 +221,14 @@
         <scope>import</scope>
       </dependency>
 
-      <!-- 测试所用依赖 -->
+      <!-- 仅做版本管理，scope 由各子模块在自身 dependencies 中声明，以避免覆盖下游项目依赖范围 -->
       <dependency>
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
         <version>2.10.6</version>
-        <scope>test</scope>
       </dependency>
+
+      <!-- 测试所用依赖 -->
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
