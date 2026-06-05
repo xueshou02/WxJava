@@ -19,8 +19,7 @@ import static me.chanjar.weixin.cp.constant.WxCpApiPathConsts.Kf.*;
 /**
  * 微信客服接口-服务实现
  *
- * @author Fu
- * @date 2022/1/19 19:41
+ * @author Fu  created on  2022/1/19 19:41
  */
 @RequiredArgsConstructor
 public class WxCpKfServiceImpl implements WxCpKfService {
@@ -49,9 +48,16 @@ public class WxCpKfServiceImpl implements WxCpKfService {
   }
 
   @Override
-  public WxCpKfAccountListResp listAccount() throws WxErrorException {
+  public WxCpKfAccountListResp listAccount(Integer offset, Integer limit) throws WxErrorException {
     String url = cpService.getWxCpConfigStorage().getApiUrl(ACCOUNT_LIST);
-    String responseContent = cpService.post(url, "{}");
+    JsonObject json = new JsonObject();
+    if (offset != null) {
+      json.addProperty("offset", offset);
+    }
+    if (limit != null) {
+      json.addProperty("limit", limit);
+    }
+    String responseContent = cpService.post(url, json.toString());
     return WxCpKfAccountListResp.fromJson(responseContent);
   }
 
@@ -64,23 +70,62 @@ public class WxCpKfServiceImpl implements WxCpKfService {
 
   @Override
   public WxCpKfServicerOpResp addServicer(String openKfid, List<String> userIdList) throws WxErrorException {
-    return servicerOp(openKfid, userIdList, SERVICER_ADD);
+    return servicerOp(openKfid, userIdList, null, SERVICER_ADD);
+  }
+
+  @Override
+  public WxCpKfServicerOpResp addServicer(String openKfId, List<String> userIdList, List<String> departmentIdList) throws WxErrorException {
+    validateParameters(SERVICER_ADD, userIdList, departmentIdList);
+    return servicerOp(openKfId, userIdList, departmentIdList, SERVICER_ADD);
   }
 
   @Override
   public WxCpKfServicerOpResp delServicer(String openKfid, List<String> userIdList) throws WxErrorException {
-    return servicerOp(openKfid, userIdList, SERVICER_DEL);
+    return servicerOp(openKfid, userIdList, null, SERVICER_DEL);
   }
 
-  private WxCpKfServicerOpResp servicerOp(String openKfid, List<String> userIdList, String uri) throws WxErrorException {
+  @Override
+  public WxCpKfServicerOpResp delServicer(String openKfid, List<String> userIdList, List<String> departmentIdList) throws WxErrorException {
+    validateParameters(SERVICER_DEL, userIdList, departmentIdList);
+    return servicerOp(openKfid, userIdList, departmentIdList, SERVICER_DEL);
+  }
+
+  private void validateParameters(String uri, List<String> userIdList, List<String> departmentIdList) {
+    if ((userIdList == null || userIdList.isEmpty()) && (departmentIdList == null || departmentIdList.isEmpty())) {
+      throw new IllegalArgumentException("userid_list和department_id_list至少需要填其中一个");
+    }
+    if (SERVICER_DEL.equals(uri)) {
+      if (userIdList != null && userIdList.size() > 100) {
+        throw new IllegalArgumentException("可填充个数：0 ~ 100。超过100个需分批调用。");
+      }
+      if (departmentIdList != null && departmentIdList.size() > 100) {
+        throw new IllegalArgumentException("可填充个数：0 ~ 100。超过100个需分批调用。");
+      }
+    } else {
+      if (userIdList != null && userIdList.size() > 100) {
+        throw new IllegalArgumentException("可填充个数：0 ~ 100。超过100个需分批调用。");
+      }
+      if (departmentIdList != null && departmentIdList.size() > 20) {
+        throw new IllegalArgumentException("可填充个数：0 ~ 20。");
+      }
+    }
+  }
+
+  private WxCpKfServicerOpResp servicerOp(String openKfid, List<String> userIdList, List<String> departmentIdList, String uri) throws WxErrorException {
     String url = cpService.getWxCpConfigStorage().getApiUrl(uri);
 
     JsonObject json = new JsonObject();
     json.addProperty("open_kfid", openKfid);
-    JsonArray userIdArray = new JsonArray();
-    userIdList.forEach(userIdArray::add);
-    json.add("userid_list", userIdArray);
-
+    if (userIdList != null && !userIdList.isEmpty()) {
+      JsonArray userIdArray = new JsonArray();
+      userIdList.forEach(userIdArray::add);
+      json.add("userid_list", userIdArray);
+    }
+    if (departmentIdList != null && !departmentIdList.isEmpty()) {
+      JsonArray departmentIdArray = new JsonArray();
+      departmentIdList.forEach(departmentIdArray::add);
+      json.add("department_id_list", departmentIdArray);
+    }
     String responseContent = cpService.post(url, json.toString());
     return WxCpKfServicerOpResp.fromJson(responseContent);
   }
@@ -107,7 +152,7 @@ public class WxCpKfServiceImpl implements WxCpKfService {
 
   @Override
   public WxCpKfServiceStateTransResp transServiceState(String openKfid, String externalUserId,
-    Integer serviceState, String servicerUserId) throws WxErrorException {
+                                                       Integer serviceState, String servicerUserId) throws WxErrorException {
     String url = cpService.getWxCpConfigStorage().getApiUrl(SERVICE_STATE_TRANS);
 
     JsonObject json = new JsonObject();
@@ -126,6 +171,28 @@ public class WxCpKfServiceImpl implements WxCpKfService {
     String url = cpService.getWxCpConfigStorage().getApiUrl(SYNC_MSG);
 
     JsonObject json = new JsonObject();
+    if (cursor != null) {
+      json.addProperty("cursor", cursor);
+    }
+    if (token != null) {
+      json.addProperty("token", token);
+    }
+    if (limit != null) {
+      json.addProperty("limit", limit);
+    }
+    if (voiceFormat != null) {
+      json.addProperty("voice_format", voiceFormat);
+    }
+
+    String responseContent = cpService.post(url, json);
+    return WxCpKfMsgListResp.fromJson(responseContent);
+  }
+
+  @Override
+  public WxCpKfMsgListResp syncMsg(String cursor, String token, Integer limit, Integer voiceFormat, String openKfId) throws WxErrorException {
+    String url = cpService.getWxCpConfigStorage().getApiUrl(SYNC_MSG);
+
+    JsonObject json = new JsonObject();
     if (cursor!=null) {
       json.addProperty("cursor", cursor);
     }
@@ -137,6 +204,9 @@ public class WxCpKfServiceImpl implements WxCpKfService {
     }
     if (voiceFormat!=null) {
       json.addProperty("voice_format", voiceFormat);
+    }
+    if (openKfId != null) {
+      json.addProperty("open_kfid", openKfId);
     }
 
     String responseContent = cpService.post(url, json);
@@ -176,10 +246,75 @@ public class WxCpKfServiceImpl implements WxCpKfService {
   }
 
   @Override
+  public WxCpKfServiceUpgradeConfigResp getUpgradeServiceConfig() throws WxErrorException {
+    String url = cpService.getWxCpConfigStorage().getApiUrl(CUSTOMER_GET_UPGRADE_SERVICE_CONFIG);
+
+    String response = cpService.get(url, null);
+    return WxCpKfServiceUpgradeConfigResp.fromJson(response);
+  }
+
+  @Override
+  public WxCpBaseResp upgradeMemberService(String openKfid, String externalUserId,
+                                           String userid, String wording) throws WxErrorException {
+    String url = cpService.getWxCpConfigStorage().getApiUrl(CUSTOMER_UPGRADE_SERVICE);
+
+    JsonObject json = new JsonObject();
+    json.addProperty("open_kfid", openKfid);
+    json.addProperty("external_userid", externalUserId);
+    json.addProperty("type", 1);
+
+    JsonObject memberJson = new JsonObject();
+    memberJson.addProperty("userid", userid);
+    memberJson.addProperty("wording", wording);
+    json.add("member", memberJson);
+
+    String response = cpService.post(url, json);
+    return WxCpBaseResp.fromJson(response);
+  }
+
+  @Override
+  public WxCpBaseResp upgradeGroupchatService(String openKfid, String externalUserId,
+                                              String chatId, String wording) throws WxErrorException {
+    String url = cpService.getWxCpConfigStorage().getApiUrl(CUSTOMER_UPGRADE_SERVICE);
+
+    JsonObject json = new JsonObject();
+    json.addProperty("open_kfid", openKfid);
+    json.addProperty("external_userid", externalUserId);
+    json.addProperty("type", 2);
+
+    JsonObject groupchatJson = new JsonObject();
+    groupchatJson.addProperty("chat_id", chatId);
+    groupchatJson.addProperty("wording", wording);
+    json.add("groupchat", groupchatJson);
+
+    String response = cpService.post(url, json);
+    return WxCpBaseResp.fromJson(response);
+  }
+
+  @Override
+  public WxCpBaseResp cancelUpgradeService(String openKfid, String externalUserId)
+    throws WxErrorException {
+    String url = cpService.getWxCpConfigStorage().getApiUrl(CUSTOMER_CANCEL_UPGRADE_SERVICE);
+
+    JsonObject json = new JsonObject();
+    json.addProperty("open_kfid", openKfid);
+    json.addProperty("external_userid", externalUserId);
+    String response = cpService.post(url, json);
+    return WxCpBaseResp.fromJson(response);
+  }
+
+  @Override
   public WxCpKfGetCorpStatisticResp getCorpStatistic(WxCpKfGetCorpStatisticRequest request) throws WxErrorException {
     String url = cpService.getWxCpConfigStorage().getApiUrl(GET_CORP_STATISTIC);
     String responseContent = cpService.post(url, GSON.toJson(request));
     return WxCpKfGetCorpStatisticResp.fromJson(responseContent);
+  }
+
+  @Override
+  public WxCpKfGetServicerStatisticResp getServicerStatistic(WxCpKfGetServicerStatisticRequest request) throws WxErrorException {
+    String url = cpService.getWxCpConfigStorage().getApiUrl(GET_SERVICER_STATISTIC);
+    String responseContent = cpService.post(url, GSON.toJson(request));
+    return WxCpKfGetServicerStatisticResp.fromJson(responseContent);
   }
 
 }

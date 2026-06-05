@@ -1,20 +1,7 @@
 package cn.binarywang.wx.miniapp.api;
 
-import cn.binarywang.wx.miniapp.bean.delivery.AbnormalConfirmRequest;
-import cn.binarywang.wx.miniapp.bean.delivery.AbnormalConfirmResponse;
-import cn.binarywang.wx.miniapp.bean.delivery.AddOrderRequest;
-import cn.binarywang.wx.miniapp.bean.delivery.AddOrderResponse;
-import cn.binarywang.wx.miniapp.bean.delivery.BindAccountResponse;
-import cn.binarywang.wx.miniapp.bean.delivery.CancelOrderRequest;
-import cn.binarywang.wx.miniapp.bean.delivery.CancelOrderResponse;
-import cn.binarywang.wx.miniapp.bean.delivery.GetOrderRequest;
-import cn.binarywang.wx.miniapp.bean.delivery.GetOrderResponse;
-import cn.binarywang.wx.miniapp.bean.delivery.MockUpdateOrderRequest;
-import cn.binarywang.wx.miniapp.bean.delivery.MockUpdateOrderResponse;
-import cn.binarywang.wx.miniapp.bean.delivery.QueryWaybillTraceRequest;
-import cn.binarywang.wx.miniapp.bean.delivery.QueryWaybillTraceResponse;
-import cn.binarywang.wx.miniapp.bean.delivery.TraceWaybillRequest;
-import cn.binarywang.wx.miniapp.bean.delivery.TraceWaybillResponse;
+import cn.binarywang.wx.miniapp.bean.WxMaBaseResponse;
+import cn.binarywang.wx.miniapp.bean.delivery.*;
 import me.chanjar.weixin.common.error.WxErrorException;
 
 /**
@@ -25,7 +12,7 @@ import me.chanjar.weixin.common.error.WxErrorException;
  *
  * @author Luo
  * @version 1.0
- * @date 2021-10-13 16:40
+ * created on  2021-10-13 16:40
  */
 public interface WxMaImmediateDeliveryService {
 
@@ -128,5 +115,60 @@ public interface WxMaImmediateDeliveryService {
   QueryWaybillTraceResponse queryWaybillTrace(QueryWaybillTraceRequest request)
     throws WxErrorException;
 
+
+  /**
+   * 传运单接口 follow_waybill 订阅微信后台会跟踪运单的状态变化
+   * <pre>
+   * 文档地址：https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/industry/express/express_open_msg.html
+   * </pre>
+   *
+   * @param request request
+   * @return 响应
+   * @throws WxErrorException 异常
+   */
+  FollowWaybillResponse followWaybill(FollowWaybillRequest request)
+    throws WxErrorException;
+
+
+  /**
+   * 查运单接口 query_follow_trace
+   *
+   * <pre>
+   * 商户在调用完trace_waybill接口后，可以使用本接口查询到对应运单的详情信息
+   * 文档地址：https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/industry/express/express_open_msg.html
+   * </pre>
+   *
+   * @param request request
+   * @return 响应
+   * @throws WxErrorException 异常
+   */
+  QueryFollowTraceResponse queryFollowTrace(QueryFollowTraceRequest request)
+    throws WxErrorException ;
+
+  /**
+   * 获取运力id列表get_delivery_list
+   *
+   * <pre>
+   * 商户使用此接口获取所有运力id的列表
+   * 文档地址：https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/industry/express/business/express_search.html
+   * </pre>
+   *
+   * @return 响应
+   * @throws WxErrorException 异常
+   */
+  GetDeliveryListResponse getDeliveryList() throws WxErrorException;
+
+  /**
+   * 更新物流物品信息接口 update_waybill_goods
+   *
+   * <pre>
+   * 更新物品信息
+   * 文档地址：https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/industry/express/business/express_search.html
+   * </pre>
+   *
+   * @return 响应
+   * @throws WxErrorException 异常
+   */
+  WxMaBaseResponse updateWaybillGoods(UpdateWaybillGoodsRequest request) throws WxErrorException;
 
 }

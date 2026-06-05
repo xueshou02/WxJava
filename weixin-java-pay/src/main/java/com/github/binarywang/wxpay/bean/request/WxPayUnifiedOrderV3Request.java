@@ -132,6 +132,17 @@ public class WxPayUnifiedOrderV3Request implements Serializable {
   private String goodsTag;
   /**
    * <pre>
+   * 字段名：电子发票入口开放标识
+   * 变量名：support_fapiao
+   * 是否必填：否
+   * 类型：boolean
+   * 描述：传入true时，支付成功消息和支付详情页将出现开票入口。需要在微信支付商户平台或微信公众平台开通电子发票功能，传此字段才可生效。
+   * </pre>
+   */
+  @SerializedName(value = "support_fapiao")
+  private Boolean supportFapiao;
+  /**
+   * <pre>
    * 字段名：订单金额
    * 变量名：amount
    * 是否必填：是
@@ -239,6 +250,12 @@ public class WxPayUnifiedOrderV3Request implements Serializable {
      */
     @SerializedName(value = "openid")
     private String openid;
+
+    /**
+     * 实名支付用户身份标识
+     */
+    @SerializedName(value = "identity")
+    private Identity identity;
   }
 
   @Data
@@ -451,8 +468,7 @@ public class WxPayUnifiedOrderV3Request implements Serializable {
      * 变量名：area_code
      * 是否必填：否
      * 类型：string[1,32]
-     * 描述：
-     *  地区编码，详细请见省市区编号对照表(https://pay.weixin.qq.com/wiki/doc/apiv3/terms_definition/chapter1_1_3.shtml)。
+     * 描述： 地区编码, <a href="https://pay.weixin.qq.com/wiki/doc/apiv3/wxpay/ecommerce/applyments/chapter4_1.shtml">详细请见省市区编号对照表</a>。
      * 示例值：440305
      * </pre>
      */
@@ -561,5 +577,37 @@ public class WxPayUnifiedOrderV3Request implements Serializable {
      */
     @SerializedName(value = "profit_sharing")
     private Boolean profitSharing;
+  }
+
+
+  @Data
+  @NoArgsConstructor
+  public static class Identity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 证件类型
+     * IDCARD:身份证
+     * HONGKONG_MACAO:港澳回乡证
+     * HONGKONG_MACAO_RESIDENT:港澳居住证
+     * TAIWAN_RESIDENT:台湾居住证
+     * FOREIGN_RESIDENT:外国人永居证
+     * OVERSEA_PASSPORT:护照
+     */
+    @SerializedName(value = "type")
+    private String type;
+    /**
+     * 证件号
+     * 证件号，如身份证号。
+     * 示例值：43102119910910512X
+     */
+    @SerializedName(value = "number")
+    private String number;
+    /**
+     * 证件姓名。
+     * 示例值：周星星
+     */
+    @SerializedName(value = "name")
+    private String name;
   }
 }

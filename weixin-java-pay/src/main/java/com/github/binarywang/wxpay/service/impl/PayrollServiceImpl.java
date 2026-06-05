@@ -1,6 +1,7 @@
 package com.github.binarywang.wxpay.service.impl;
 
 import com.github.binarywang.wxpay.bean.marketing.payroll.*;
+import com.github.binarywang.wxpay.bean.result.WxPayApplyBillV3Result;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.PayrollService;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -17,7 +18,7 @@ import javax.crypto.IllegalBlockSizeException;
  * 微信支付-微工卡
  *
  * @author xiaoqiang
- * @date 2021/12/2
+ * created on  2021/12/2
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -182,11 +183,37 @@ public class PayrollServiceImpl implements PayrollService {
      * @throws WxPayException the wx pay exception
      */
     @Override
-    public PreOrderWithAuthResult merchantFundWithdrawBillType(String billType, String billDate) throws WxPayException {
+    public WxPayApplyBillV3Result merchantFundWithdrawBillType(String billType, String billDate, String tarType) throws WxPayException {
         String url = String.format("%s/v3/merchant/fund/withdraw/bill-type/%s", payService.getPayBaseUrl(), billType);
         String query = String.format("?bill_date=%s", billDate);
+        if (StringUtils.isNotBlank(tarType)) {
+            query += String.format("&tar_type=%s", tarType);
+        }
         String response = payService.getV3(url + query);
-        return GSON.fromJson(response, PreOrderWithAuthResult.class);
+        return GSON.fromJson(response, WxPayApplyBillV3Result.class);
+    }
+
+    /**
+     * 微工卡批量转账API
+     * 适用对象：服务商
+     * 请求URL：https://api.mch.weixin.qq.com/v3/payroll-card/transfer-batches
+     * 请求方式：POST
+     *
+     * @param request 请求参数
+     * @return 返回数据
+     * @throws WxPayException the wx pay exception
+     */
+    @Override
+    public PayrollTransferBatchesResult payrollCardTransferBatches(PayrollTransferBatchesRequest request) throws WxPayException {
+        String url = String.format("%s/v3/payroll-card/transfer-batches", payService.getPayBaseUrl());
+        // 对敏感信息进行加密
+        if (request.getTransferDetailList() != null && !request.getTransferDetailList().isEmpty()) {
+            for (PayrollTransferBatchesRequest.TransferDetail detail : request.getTransferDetailList()) {
+                RsaCryptoUtil.encryptFields(detail, payService.getConfig().getVerifier().getValidCertificate());
+            }
+        }
+        String response = payService.postV3WithWechatpaySerial(url, GSON.toJson(request));
+        return GSON.fromJson(response, PayrollTransferBatchesResult.class);
     }
 
 }

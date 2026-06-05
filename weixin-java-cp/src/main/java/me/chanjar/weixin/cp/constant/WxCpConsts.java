@@ -49,6 +49,11 @@ public class WxCpConsts {
     public static final String CHANGE_CONTACT = "change_contact";
 
     /**
+     * 企业微信模板卡片事件推送
+     */
+    public static final String TEMPLATE_CARD_EVENT = "template_card_event";
+
+    /**
      * 点击菜单拉取消息的事件推送.
      */
     public static final String CLICK = "click";
@@ -94,7 +99,32 @@ public class WxCpConsts {
     public static final String TASKCARD_CLICK = "taskcard_click";
 
     /**
-     * 企业成员添加外部联系人事件推送
+     * 企业互联共享应用事件回调.
+     */
+    public static final String SHARE_AGENT_CHANGE = "share_agent_change";
+
+    /**
+     * 上下游共享应用事件回调.
+     */
+    public static final String SHARE_CHAIN_CHANGE = "share_chain_change";
+
+    /**
+     * 通用模板卡片右上角菜单事件推送.
+     */
+    public static final String TEMPLATE_CARD_MENU_EVENT = "template_card_menu_event";
+
+    /**
+     * 长期未使用应用临时停用事件.
+     */
+    public static final String CLOSE_INACTIVE_AGENT = "close_inactive_agent";
+
+    /**
+     * 长期未使用应用重新启用事件.
+     */
+    public static final String REOPEN_INACTIVE_AGENT = "reopen_inactive_agent";
+
+    /**
+     * {@code 企业成员添加外部联系人事件推送 & 会话存档客户同意进行聊天内容存档事件回调事件}
      */
     public static final String CHANGE_EXTERNAL_CONTACT = "change_external_contact";
 
@@ -110,6 +140,7 @@ public class WxCpConsts {
 
     /**
      * 企业微信审批事件推送（自建应用审批）
+     * https://developer.work.weixin.qq.com/document/path/90269
      */
     public static final String OPEN_APPROVAL_CHANGE = "open_approval_change";
 
@@ -142,6 +173,220 @@ public class WxCpConsts {
      * 删除日程事件
      */
     public static final String DELETE_SCHEDULE = "delete_schedule";
+
+    /**
+     * 日程回执事件
+     */
+    public static final String RESPOND_SCHEDULE = "respond_schedule";
+
+    /**
+     * 会议室预定事件.
+     */
+    public static final String BOOK_MEETING_ROOM = "book_meeting_room";
+
+    /**
+     * 会议室取消事件.
+     */
+    public static final String CANCEL_MEETING_ROOM = "cancel_meeting_room";
+
+    /**
+     * 家校通讯录事件
+     */
+    public static final String CHANGE_SCHOOL_CONTACT = "change_school_contact";
+
+    /**
+     * 产生会话回调事件
+     */
+    public static final String MSGAUDIT_NOTIFY = "msgaudit_notify";
+
+    /**
+     * 直播回调事件
+     */
+    public static final String LIVING_STATUS_CHANGE = "living_status_change";
+
+    /**
+     * 微信客服消息事件
+     */
+    public static final String KF_MSG_OR_EVENT = "kf_msg_or_event";
+
+    /**
+     * 客服账号授权变更事件
+     */
+    public static final String KF_ACCOUNT_AUTH_CHANGE = "kf_account_auth_change";
+
+    /**
+     * 获客助手事件通知
+     */
+    public static final String CUSTOMER_ACQUISITION = "customer_acquisition";
+
+    /**
+     * <a href="https://developer.work.weixin.qq.com/document/path/96488#%E5%9B%9E%E8%B0%83%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1%E7%BB%93%E6%9E%9C">异步上传临时素材结果回调通知</a>
+     */
+    public static final String UPLOAD_MEDIA_JOB_FINISH = "upload_media_job_finish";
+
+  }
+
+  /**
+   * 获客助手事件通知CHANGE_TYPE
+   * https://developer.work.weixin.qq.com/document/path/97299
+   */
+  @UtilityClass
+  public static class CustomerAcquisitionChangeType {
+
+    /**
+     * 获客额度即将耗尽事件
+     */
+    public static final String BALANCE_LOW = "balance_low";
+
+    /**
+     * 使用量已经耗尽事件
+     */
+    public static final String BALANCE_EXHAUSTED = "balance_exhausted";
+
+    /**
+     * 获客链接不可用事件
+     */
+    public static final String LINK_UNAVAILABLE = "link_unavailable";
+
+    /**
+     * 微信客户发起会话事件
+     */
+    public static final String CUSTOMER_START_CHAT = "customer_start_chat";
+
+    /**
+     * 删除获客链接事件
+     */
+    public static final String DELETE_LINK = "delete_link";
+
+    /**
+     * 通过获客链接申请好友事件
+     */
+    public static final String friend_request = "friend_request";
+
+  }
+
+  /**
+   * 会话存档事件CHANGE_TYPE
+   * https://developer.work.weixin.qq.com/document/path/92005
+   */
+  @UtilityClass
+  public static class MsgAuditChangeType {
+
+    /**
+     * The constant MSG_AUDIT_APPROVED.
+     */
+    public static final String MSG_AUDIT_APPROVED = "msg_audit_approved";
+
+  }
+
+  /**
+   * 会话存档媒体类型
+   * https://developer.work.weixin.qq.com/document/path/91774
+   */
+  @UtilityClass
+  public static class MsgAuditMediaType {
+
+    /**
+     * 图片
+     */
+    public static final String IMAGE = "image";
+
+    /**
+     * 语音
+     */
+    public static final String VOICE = "voice";
+
+    /**
+     * 视频
+     */
+    public static final String VIDEO = "video";
+
+    /**
+     * 表情
+     */
+    public static final String EMOTION = "emotion";
+
+    /**
+     * 文件
+     */
+    public static final String FILE = "file";
+
+    /**
+     * 音频存档消息
+     */
+    public static final String MEETING_VOICE_CALL = "meeting_voice_call";
+
+    /**
+     * 音频共享文档消息
+     */
+    public static final String VOIP_DOC_SHARE = "voip_doc_share";
+
+    @UtilityClass
+    public static class MsgAuditSuffix {
+
+      public static final String JPG = ".jpg";
+      public static final String PNG = ".png";
+      public static final String GIF = ".gif";
+      public static final String MP4 = ".mp4";
+      public static final String AMR = ".amr";
+
+    }
+
+  }
+
+  /**
+   * 家校通讯录变更事件CHANGE_TYPE
+   */
+  @UtilityClass
+  public static class SchoolContactChangeType {
+
+    /**
+     * 部门变更事件
+     * https://developer.work.weixin.qq.com/document/path/92052
+     */
+    public static final String CREATE_DEPARTMENT = "create_department";
+    /**
+     * The constant UPDATE_DEPARTMENT.
+     */
+    public static final String UPDATE_DEPARTMENT = "update_department";
+    /**
+     * The constant DELETE_DEPARTMENT.
+     */
+    public static final String DELETE_DEPARTMENT = "delete_department";
+
+    /**
+     * 成员变更事件
+     * https://developer.work.weixin.qq.com/document/path/92032
+     */
+    public static final String CREATE_STUDENT = "create_student";
+    /**
+     * The constant UPDATE_STUDENT.
+     */
+    public static final String UPDATE_STUDENT = "update_student";
+    /**
+     * The constant DELETE_STUDENT.
+     */
+    public static final String DELETE_STUDENT = "delete_student";
+    /**
+     * The constant CREATE_PARENT.
+     */
+    public static final String CREATE_PARENT = "create_parent";
+    /**
+     * The constant UPDATE_PARENT.
+     */
+    public static final String UPDATE_PARENT = "update_parent";
+    /**
+     * The constant DELETE_PARENT.
+     */
+    public static final String DELETE_PARENT = "delete_parent";
+    /**
+     * The constant SUBSCRIBE.
+     */
+    public static final String SUBSCRIBE = "subscribe";
+    /**
+     * The constant UNSUBSCRIBE.
+     */
+    public static final String UNSUBSCRIBE = "unsubscribe";
 
   }
 
@@ -176,6 +421,9 @@ public class WxCpConsts {
      */
     public static final String TRANSFER_FAIL = "transfer_fail";
 
+    /**
+     * The type External contact transfer fail reason.
+     */
     @UtilityClass
     public static class ExternalContactTransferFailReason {
       /**
@@ -189,6 +437,9 @@ public class WxCpConsts {
     }
   }
 
+  /**
+   * The type External chat change type.
+   */
   @UtilityClass
   public static class ExternalChatChangeType {
     /**
@@ -204,6 +455,9 @@ public class WxCpConsts {
      */
     public static final String DISMISS = "dismiss";
 
+    /**
+     * The type External chat update detail.
+     */
     @UtilityClass
     public static class ExternalChatUpdateDetail {
       /**
@@ -229,6 +483,9 @@ public class WxCpConsts {
     }
   }
 
+  /**
+   * The type External tag change type.
+   */
   @UtilityClass
   public static class ExternalTagChangeType {
 
@@ -250,6 +507,9 @@ public class WxCpConsts {
     public static final String SHUFFLE = "shuffle";
   }
 
+  /**
+   * The type Tage type.
+   */
   @UtilityClass
   public static class TageType {
     /**
@@ -371,6 +631,11 @@ public class WxCpConsts {
     public static final String MARKDOWN = "markdown";
 
     /**
+     * markdown_v2消息.
+     */
+    public static final String MARKDOWN_V2 = "markdown_v2";
+
+    /**
      * 图文消息（点击跳转到外链）.
      */
     public static final String NEWS = "news";
@@ -379,6 +644,16 @@ public class WxCpConsts {
      * 文件类型消息.
      */
     public static final String FILE = "file";
+
+    /**
+     * 文件类型消息.
+     */
+    public static final String VOICE = "voice";
+
+    /**
+     * 模版类型消息.
+     */
+    public static final String TEMPLATE_CARD = "template_card";
 
   }
 
@@ -425,26 +700,44 @@ public class WxCpConsts {
     public static final String MARKDOWN = "markdown";
   }
 
+  /**
+   * The type Work bench type.
+   */
   @UtilityClass
   public static class WorkBenchType {
+    /**
+     * The constant KEYDATA.
+     */
     /*
      * 关键数据型
      * */
     public static final String KEYDATA = "keydata";
+    /**
+     * The constant IMAGE.
+     */
     /*
      * 图片型
      * */
     public static final String IMAGE = "image";
+    /**
+     * The constant LIST.
+     */
     /*
      * 列表型
      * */
     public static final String LIST = "list";
+    /**
+     * The constant WEBVIEW.
+     */
     /*
      * webview型
      * */
     public static final String WEBVIEW = "webview";
   }
 
+  /**
+   * The type Welcome msg type.
+   */
   @UtilityClass
   public static class WelcomeMsgType {
     /**
@@ -470,6 +763,9 @@ public class WxCpConsts {
     public static final String FILE = "file";
   }
 
+  /**
+   * The type Product attachment type.
+   */
   @UtilityClass
   public static class ProductAttachmentType {
 

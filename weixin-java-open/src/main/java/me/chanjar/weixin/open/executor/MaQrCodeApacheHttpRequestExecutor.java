@@ -25,10 +25,10 @@ import java.util.UUID;
 
 /**
  * @author yqx
- * @date 2018-09-13
+ * created on  2018-09-13
  */
 public class MaQrCodeApacheHttpRequestExecutor extends MaQrCodeRequestExecutor<CloseableHttpClient, HttpHost> {
-  public MaQrCodeApacheHttpRequestExecutor(RequestHttp requestHttp) {
+  public MaQrCodeApacheHttpRequestExecutor(RequestHttp<CloseableHttpClient, HttpHost> requestHttp) {
     super(requestHttp);
   }
 
@@ -61,8 +61,6 @@ public class MaQrCodeApacheHttpRequestExecutor extends MaQrCodeRequestExecutor<C
         }
       }
       return FileUtils.createTmpFile(inputStream, UUID.randomUUID().toString(), "jpg");
-    } finally {
-      httpGet.releaseConnection();
     }
   }
 }

@@ -11,7 +11,6 @@ import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.WildcardTypePermission;
-
 import java.io.Writer;
 
 /**
@@ -20,6 +19,18 @@ import java.io.Writer;
  * @author Daniel Qian
  */
 public class XStreamInitializer {
+
+  public static ClassLoader classLoader;
+
+  /**
+   * 设置类加载器
+   *
+   * @param classLoaderInfo 类加载器
+   */
+  public static void setClassLoader(ClassLoader classLoaderInfo) {
+    classLoader = classLoaderInfo;
+  }
+
   private static final XppDriver XPP_DRIVER = new XppDriver() {
     @Override
     public HierarchicalStreamWriter createWriter(Writer out) {
@@ -87,7 +98,10 @@ public class XStreamInitializer {
     xstream.addPermission(new WildcardTypePermission(new String[]{
       "me.chanjar.weixin.**", "cn.binarywang.wx.**", "com.github.binarywang.**"
     }));
-    xstream.setClassLoader(Thread.currentThread().getContextClassLoader());
+    if (null == classLoader) {
+      classLoader = Thread.currentThread().getContextClassLoader();
+    }
+    xstream.setClassLoader(classLoader);
     return xstream;
   }
 

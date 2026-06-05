@@ -5,6 +5,7 @@ import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 按标签群发的消息.
@@ -23,17 +24,21 @@ public class WxMpMassTagMessage implements Serializable {
    * <pre>
    * 消息类型.
    * 请使用
-   * {@link WxConsts.MassMsgType#IMAGE}
-   * {@link WxConsts.MassMsgType#MPNEWS}
-   * {@link WxConsts.MassMsgType#TEXT}
-   * {@link WxConsts.MassMsgType#MPVIDEO}
-   * {@link WxConsts.MassMsgType#VOICE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.MassMsgType#IMAGE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.MassMsgType#MPNEWS}
+   * {@link me.chanjar.weixin.common.api.WxConsts.MassMsgType#TEXT}
+   * {@link me.chanjar.weixin.common.api.WxConsts.MassMsgType#MPVIDEO}
+   * {@link me.chanjar.weixin.common.api.WxConsts.MassMsgType#VOICE}
    * 如果msgtype和media_id不匹配的话，会返回系统繁忙的错误
    * </pre>
    */
   private String msgType;
   private String content;
   private String mediaId;
+  /**
+   * 图片列表
+   */
+  private List<String> mediaIds;
   /**
    * 是否群发给所有用户.
    */

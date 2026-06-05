@@ -7,6 +7,7 @@ import lombok.Setter;
 import me.chanjar.weixin.cp.util.json.WxCpGsonBuilder;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -23,9 +24,6 @@ public class WxCpChatModel implements Serializable {
 
   @SerializedName("action")
   private String action;
-
-  @SerializedName("send")
-  private String send;
 
   @SerializedName("from")
   private String from;
@@ -204,15 +202,35 @@ public class WxCpChatModel implements Serializable {
   @SerializedName("sphfeed")
   private SphFeed sphFeed;
 
+  /**
+   * 音视频通话消息
+   */
+  @SerializedName("voiptext")
+  private VoipText voipText;
+
+  /**
+   * From json wx cp chat model.
+   *
+   * @param json the json
+   * @return the wx cp chat model
+   */
   public static WxCpChatModel fromJson(String json) {
     return WxCpGsonBuilder.create().fromJson(json, WxCpChatModel.class);
   }
 
+  /**
+   * To json string.
+   *
+   * @return the string
+   */
   public String toJson() {
     return WxCpGsonBuilder.create().toJson(this);
   }
 
 
+  /**
+   * The type Text.
+   */
   @Getter
   @Setter
   public static class Text implements Serializable {
@@ -221,10 +239,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("content")
     private String content;
 
+    /**
+     * From json text.
+     *
+     * @param json the json
+     * @return the text
+     */
     public static Text fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Text.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -232,6 +261,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Image.
+   */
   @Getter
   @Setter
   public static class Image implements Serializable {
@@ -246,10 +278,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("filesize")
     private Long fileSize;
 
+    /**
+     * From json image.
+     *
+     * @param json the json
+     * @return the image
+     */
     public static Image fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Image.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -257,6 +300,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Revoke.
+   */
   @Getter
   @Setter
   public static class Revoke implements Serializable {
@@ -265,10 +311,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("pre_msgid")
     private String preMsgId;
 
+    /**
+     * From json revoke.
+     *
+     * @param json the json
+     * @return the revoke
+     */
     public static Revoke fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Revoke.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -276,6 +333,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Agree.
+   */
   @Getter
   @Setter
   public static class Agree implements Serializable {
@@ -290,10 +350,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName(value = "disagree_time")
     private Long disagreeTime;
 
+    /**
+     * From json agree.
+     *
+     * @param json the json
+     * @return the agree
+     */
     public static Agree fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Agree.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -301,6 +372,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Voice.
+   */
   @Getter
   @Setter
   public static class Voice implements Serializable {
@@ -318,10 +392,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("play_length")
     private Long playLength;
 
+    /**
+     * From json voice.
+     *
+     * @param json the json
+     * @return the voice
+     */
     public static Voice fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Voice.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -329,6 +414,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Video.
+   */
   @Getter
   @Setter
   public static class Video implements Serializable {
@@ -346,10 +434,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("play_length")
     private Long playLength;
 
+    /**
+     * From json video.
+     *
+     * @param json the json
+     * @return the video
+     */
     public static Video fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Video.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -357,6 +456,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Card.
+   */
   @Getter
   @Setter
   public static class Card implements Serializable {
@@ -368,10 +470,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("userid")
     private String userId;
 
+    /**
+     * From json card.
+     *
+     * @param json the json
+     * @return the card
+     */
     public static Card fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Card.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -379,6 +492,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Location.
+   */
   @Getter
   @Setter
   public static class Location implements Serializable {
@@ -399,10 +515,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("zoom")
     private Integer zoom;
 
+    /**
+     * From json location.
+     *
+     * @param json the json
+     * @return the location
+     */
     public static Location fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Location.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -410,6 +537,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Emotion.
+   */
   @Getter
   @Setter
   public static class Emotion implements Serializable {
@@ -436,10 +566,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("sdkfileid")
     private String sdkFileId;
 
+    /**
+     * From json emotion.
+     *
+     * @param json the json
+     * @return the emotion
+     */
     public static Emotion fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Emotion.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -447,6 +588,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type File.
+   */
   @Getter
   @Setter
   public static class File implements Serializable {
@@ -465,12 +609,23 @@ public class WxCpChatModel implements Serializable {
     private String sdkFileId;
 
     @SerializedName("filesize")
-    private Integer fileSize;
+    private Long fileSize;
 
+    /**
+     * From json file.
+     *
+     * @param json the json
+     * @return the file
+     */
     public static File fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, File.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -478,6 +633,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Link.
+   */
   @Getter
   @Setter
   public static class Link implements Serializable {
@@ -495,10 +653,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("image_url")
     private String imageUrl;
 
+    /**
+     * From json link.
+     *
+     * @param json the json
+     * @return the link
+     */
     public static Link fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Link.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -526,10 +695,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("displayname")
     private String displayName;
 
+    /**
+     * From json weapp.
+     *
+     * @param json the json
+     * @return the weapp
+     */
     public static Weapp fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Weapp.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -551,10 +731,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("title")
     private String title;
 
+    /**
+     * From json chat record.
+     *
+     * @param json the json
+     * @return the chat record
+     */
     public static ChatRecord fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, ChatRecord.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -562,6 +753,9 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Chat record item.
+   */
   @Getter
   @Setter
   public static class ChatRecordItem implements Serializable {
@@ -579,10 +773,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("from_chatroom")
     private Boolean fromChatRoom;
 
+    /**
+     * From json chat record item.
+     *
+     * @param json the json
+     * @return the chat record item
+     */
     public static ChatRecordItem fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, ChatRecordItem.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -613,10 +818,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("details")
     private List<Details> details;
 
+    /**
+     * From json collect.
+     *
+     * @param json the json
+     * @return the collect
+     */
     public static Collect fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Collect.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -624,13 +840,19 @@ public class WxCpChatModel implements Serializable {
   }
 
 
+  /**
+   * The type Details.
+   */
   @Getter
   @Setter
   public static class Details implements Serializable {
     private static final long serialVersionUID = -5028321625140879571L;
 
+    /**
+     * 表项id Uint64类型
+     */
     @SerializedName("id")
-    private Long id;
+    private BigInteger id;
 
     @SerializedName("ques")
     private String ques;
@@ -638,10 +860,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("type")
     private String type;
 
+    /**
+     * From json details.
+     *
+     * @param json the json
+     * @return the details
+     */
     public static Details fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Details.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -669,10 +902,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("wish")
     private String wish;
 
+    /**
+     * From json redpacket.
+     *
+     * @param json the json
+     * @return the redpacket
+     */
     public static Redpacket fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Redpacket.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -706,16 +950,30 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("meetingtype")
     private Integer meetingType;
 
+    /**
+     * 会议id Uint64类型
+     */
     @SerializedName("meetingid")
-    private Long meetingId;
+    private BigInteger meetingId;
 
     @SerializedName("status")
     private Integer status;
 
+    /**
+     * From json meeting.
+     *
+     * @param json the json
+     * @return the meeting
+     */
     public static Meeting fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Meeting.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -740,10 +998,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("link_url")
     private String linkUrl;
 
+    /**
+     * From json doc.
+     *
+     * @param json the json
+     * @return the doc
+     */
     public static Doc fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Doc.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -765,10 +1034,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("item")
     private List<NewsItem> newsItem;
 
+    /**
+     * From json info.
+     *
+     * @param json the json
+     * @return the info
+     */
     public static Info fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Info.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -796,10 +1076,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("picurl")
     private String picUrl;
 
+    /**
+     * From json news item.
+     *
+     * @param json the json
+     * @return the news item
+     */
     public static NewsItem fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, NewsItem.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -836,10 +1127,21 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("remarks")
     private String remarks;
 
+    /**
+     * From json calendar.
+     *
+     * @param json the json
+     * @return the calendar
+     */
     public static Calendar fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, Calendar.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -858,6 +1160,9 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("item")
     private List<Item> item;
 
+    /**
+     * The type Item.
+     */
     @Getter
     @Setter
     public static class Item implements Serializable {
@@ -894,14 +1199,28 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("sharescreendata")
     private List<ShareScreenData> shareScreenData;
 
+    /**
+     * From json meeting voice call.
+     *
+     * @param json the json
+     * @return the meeting voice call
+     */
     public static MeetingVoiceCall fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, MeetingVoiceCall.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
 
+    /**
+     * The type Demo file data.
+     */
     @Getter
     @Setter
     public static class DemoFileData implements Serializable {
@@ -919,16 +1238,30 @@ public class WxCpChatModel implements Serializable {
       @SerializedName("endtime")
       private Long endTime;
 
+      /**
+       * From json demo file data.
+       *
+       * @param json the json
+       * @return the demo file data
+       */
       public static DemoFileData fromJson(String json) {
         return WxCpGsonBuilder.create().fromJson(json, DemoFileData.class);
       }
 
+      /**
+       * To json string.
+       *
+       * @return the string
+       */
       public String toJson() {
         return WxCpGsonBuilder.create().toJson(this);
       }
 
     }
 
+    /**
+     * The type Share screen data.
+     */
     @Getter
     @Setter
     public static class ShareScreenData implements Serializable {
@@ -943,10 +1276,21 @@ public class WxCpChatModel implements Serializable {
       @SerializedName("endtime")
       private Long endTime;
 
+      /**
+       * From json share screen data.
+       *
+       * @param json the json
+       * @return the share screen data
+       */
       public static ShareScreenData fromJson(String json) {
         return WxCpGsonBuilder.create().fromJson(json, ShareScreenData.class);
       }
 
+      /**
+       * To json string.
+       *
+       * @return the string
+       */
       public String toJson() {
         return WxCpGsonBuilder.create().toJson(this);
       }
@@ -973,10 +1317,57 @@ public class WxCpChatModel implements Serializable {
     @SerializedName("feed_desc")
     private String feedDesc;
 
+    /**
+     * From json sph feed.
+     *
+     * @param json the json
+     * @return the sph feed
+     */
     public static SphFeed fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, SphFeed.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
+    public String toJson() {
+      return WxCpGsonBuilder.create().toJson(this);
+    }
+
+  }
+
+
+  /**
+   * 音视频通话消息
+   */
+  @Getter
+  @Setter
+  public static class VoipText implements Serializable {
+    private static final long serialVersionUID = -5028321625140879571L;
+
+    @SerializedName("callduration")
+    private Integer callDuration;
+
+    @SerializedName("invitetype")
+    private Integer inviteType;
+
+    /**
+     * From json voip text.
+     *
+     * @param json the json
+     * @return the voip text
+     */
+    public static VoipText fromJson(String json) {
+      return WxCpGsonBuilder.create().fromJson(json, VoipText.class);
+    }
+
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }

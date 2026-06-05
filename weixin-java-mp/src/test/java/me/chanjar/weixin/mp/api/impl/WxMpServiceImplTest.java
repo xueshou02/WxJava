@@ -44,6 +44,15 @@ public class WxMpServiceImplTest {
     System.out.println(qrConnectUrl);
   }
 
+  @Test
+  public void testBuildQrConnectRedirectUrl() {
+    String qrConnectRedirectUrl = this.wxService.getWxMpConfigStorage().getQrConnectRedirectUrl();
+    String qrConnectUrl = this.wxService.buildQrConnectUrl(qrConnectRedirectUrl,
+      WxConsts.QrConnectScope.SNSAPI_LOGIN, null);
+    Assert.assertNotNull(qrConnectUrl);
+    System.out.println(qrConnectUrl);
+  }
+
   public void testGetTicket() throws WxErrorException {
     String ticket = this.wxService.getTicket(TicketType.SDK, false);
     System.out.println(ticket);
@@ -52,6 +61,17 @@ public class WxMpServiceImplTest {
 
   public void testRefreshAccessToken() throws WxErrorException {
     WxMpConfigStorage configStorage = this.wxService.getWxMpConfigStorage();
+    String before = configStorage.getAccessToken();
+    this.wxService.getAccessToken(false);
+
+    String after = configStorage.getAccessToken();
+    Assert.assertNotEquals(before, after);
+    Assert.assertTrue(StringUtils.isNotBlank(after));
+  }
+
+  public void testStableRefreshAccessToken() throws WxErrorException {
+    WxMpConfigStorage configStorage = this.wxService.getWxMpConfigStorage();
+    configStorage.useStableAccessToken(true);
     String before = configStorage.getAccessToken();
     this.wxService.getAccessToken(false);
 

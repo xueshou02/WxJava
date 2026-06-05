@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author <a href="https://www.sacoc.cn">广州跨界-宋心成</a>
- * @date 2021/5/13/013
+ * created on  2021/5/13/013
  */
 
 @AllArgsConstructor
@@ -91,7 +91,7 @@ public class WxMpGuideTagServiceImpl implements WxMpGuideTagService {
       new TypeToken<List<String>>() {
       }.getType());
     if (isExclude) {
-      if (list.size() > 0) {
+      if (!list.isEmpty()) {
         if (list.get(list.size() - 1).contains("\n")) {
           list.remove(list.size() - 1);
         }

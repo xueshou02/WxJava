@@ -4,7 +4,7 @@ package me.chanjar.weixin.mp.enums;
  * 微信卡券类型.
  *
  * @author chenyixin
- * @date 2019-09-07 23:33
+ * created on  2019-09-07 23:33
  **/
 public enum WxCardType {
   MEMBER_CARD("MEMBER_CARD"),
@@ -14,7 +14,7 @@ public enum WxCardType {
   GIFT("GIFT"),
   GENERAL_COUPON("GENERAL_COUPON");
 
-  private String code;
+  private final String code;
 
   WxCardType(String code) {
     this.code = code;

@@ -4,7 +4,6 @@ import jodd.http.HttpConnectionProvider;
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import jodd.http.ProxyInfo;
-import jodd.util.StringPool;
 
 import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxError;
@@ -23,7 +22,7 @@ import java.nio.charset.StandardCharsets;
  * Created by ecoolper on 2017/5/5.
  */
 public class MaterialVoiceAndImageDownloadJoddHttpRequestExecutor extends MaterialVoiceAndImageDownloadRequestExecutor<HttpConnectionProvider, ProxyInfo> {
-  public MaterialVoiceAndImageDownloadJoddHttpRequestExecutor(RequestHttp requestHttp, File tmpDirFile) {
+  public MaterialVoiceAndImageDownloadJoddHttpRequestExecutor(RequestHttp<HttpConnectionProvider, ProxyInfo> requestHttp, File tmpDirFile) {
     super(requestHttp, tmpDirFile);
   }
 
@@ -42,7 +41,7 @@ public class MaterialVoiceAndImageDownloadJoddHttpRequestExecutor extends Materi
       // 下载媒体文件出错
       byte[] responseContent = IOUtils.toByteArray(inputStream);
       String responseContentString = new String(responseContent, StandardCharsets.UTF_8);
-      if (responseContentString.length() < 100) {
+      if (responseContentString.length() <= 215) {
         try {
           WxError wxError = WxGsonBuilder.create().fromJson(responseContentString, WxError.class);
           if (wxError.getErrorCode() != 0) {

@@ -21,9 +21,9 @@ import static me.chanjar.weixin.cp.constant.WxCpConsts.LinkedCorpMsgType.*;
 
 /**
  * 互联企业消息.
+ * https://developer.work.weixin.qq.com/document/path/90250
  *
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
- * @date 2020-08-30
+ * @author <a href="https://github.com/binarywang">Binary Wang</a> created on  2020-08-30
  */
 @Data
 @Builder
@@ -43,7 +43,8 @@ public class WxCpLinkedCorpMessage implements Serializable {
    */
   private String[] toUsers;
   /**
-   * 部门ID列表，最多支持100个。partyid在互联圈子内唯一。每个元素都是字符串类型，格式为：linked_id/party_id，其中linked_id是互联id，party_id是在互联圈子中的部门id。如果是本企业的部门，则直接传party_id即可。
+   * 部门ID列表，最多支持100个。partyid在互联圈子内唯一。每个元素都是字符串类型，格式为：linked_id/party_id，其中linked_id是互联id，party_id是在互联圈子中的部门id
+   * 。如果是本企业的部门，则直接传party_id即可。
    */
   private String[] toParties;
   /**
@@ -84,13 +85,13 @@ public class WxCpLinkedCorpMessage implements Serializable {
   /**
    * <pre>
    * 请使用.
-   * {@link LinkedCorpMsgType#TEXT}
-   * {@link LinkedCorpMsgType#IMAGE}
-   * {@link LinkedCorpMsgType#VIDEO}
-   * {@link LinkedCorpMsgType#NEWS}
-   * {@link LinkedCorpMsgType#MPNEWS}
-   * {@link LinkedCorpMsgType#MARKDOWN}
-   * {@link LinkedCorpMsgType#MINIPROGRAM_NOTICE}
+   * {@link me.chanjar.weixin.cp.constant.WxCpConsts.LinkedCorpMsgType#TEXT}
+   * {@link me.chanjar.weixin.cp.constant.WxCpConsts.LinkedCorpMsgType#IMAGE}
+   * {@link me.chanjar.weixin.cp.constant.WxCpConsts.LinkedCorpMsgType#VIDEO}
+   * {@link me.chanjar.weixin.cp.constant.WxCpConsts.LinkedCorpMsgType#NEWS}
+   * {@link me.chanjar.weixin.cp.constant.WxCpConsts.LinkedCorpMsgType#MPNEWS}
+   * {@link me.chanjar.weixin.cp.constant.WxCpConsts.LinkedCorpMsgType#MARKDOWN}
+   * {@link me.chanjar.weixin.cp.constant.WxCpConsts.LinkedCorpMsgType#MINIPROGRAM_NOTICE}
    * </pre>
    *
    * @param msgType 消息类型
@@ -99,6 +100,11 @@ public class WxCpLinkedCorpMessage implements Serializable {
     this.msgType = msgType;
   }
 
+  /**
+   * To json string.
+   *
+   * @return the string
+   */
   public String toJson() {
     JsonObject messageJson = new JsonObject();
 

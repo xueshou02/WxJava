@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.bean.WxCardApiSignature;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -113,7 +114,7 @@ public class WxMpCardServiceImpl implements WxMpCardService {
     param.addProperty("code", code);
     param.addProperty("check_consume", checkConsume);
     String responseContent = this.wxMpService.post(WxMpApiUrl.Card.CARD_CODE_GET, param.toString());
-    JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
+    JsonElement tmpJsonElement = JsonParser.parseString(responseContent);
     return WxMpGsonBuilder.create().fromJson(tmpJsonElement,
       new TypeToken<WxMpCardResult>() {
       }.getType());
@@ -144,7 +145,7 @@ public class WxMpCardServiceImpl implements WxMpCardService {
     param.addProperty("openid", openId);
     param.addProperty("is_mark", isMark);
     String responseContent = this.getWxMpService().post(WxMpApiUrl.Card.CARD_CODE_MARK, param.toString());
-    JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
+    JsonElement tmpJsonElement = JsonParser.parseString(responseContent);
     WxMpCardResult cardResult = WxMpGsonBuilder.create().fromJson(tmpJsonElement,
       new TypeToken<WxMpCardResult>() {
       }.getType());
@@ -161,11 +162,11 @@ public class WxMpCardServiceImpl implements WxMpCardService {
 
     // 判断返回值
     JsonObject json = GsonParser.parse(responseContent);
-    String errcode = json.get("errcode").getAsString();
+    String errcode = json.get(WxConsts.ERR_CODE).getAsString();
     if (!"0".equals(errcode)) {
       String errmsg = json.get("errmsg").getAsString();
       throw new WxErrorException(WxError.builder()
-        .errorCode(Integer.valueOf(errcode)).errorMsg(errmsg)
+        .errorCode(Integer.parseInt(errcode)).errorMsg(errmsg)
         .build());
     }
 
@@ -256,7 +257,7 @@ public class WxMpCardServiceImpl implements WxMpCardService {
   @Override
   public WxMpCardCodeDepositResult cardCodeDeposit(String cardId, List<String> codeList) throws WxErrorException {
     checkCardId(cardId);
-    if (codeList.size() == 0 || codeList.size() > 100) {
+    if (codeList.isEmpty() || codeList.size() > 100) {
       throw new WxErrorException(WxError.builder().errorCode(40109).errorMsg("code数量为0或者code数量超过100个").build());
     }
     JsonObject param = new JsonObject();
@@ -282,7 +283,7 @@ public class WxMpCardServiceImpl implements WxMpCardService {
   @Override
   public WxMpCardCodeCheckcodeResult cardCodeCheckcode(String cardId, List<String> codeList) throws WxErrorException {
     checkCardId(cardId);
-    if (codeList.size() == 0 || codeList.size() > 100) {
+    if (codeList.isEmpty() || codeList.size() > 100) {
       throw new WxErrorException(WxError.builder().errorCode(40109).errorMsg("code数量为0或者code数量超过100个").build());
     }
     JsonObject param = new JsonObject();

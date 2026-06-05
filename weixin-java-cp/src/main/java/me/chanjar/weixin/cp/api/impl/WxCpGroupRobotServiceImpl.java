@@ -17,8 +17,7 @@ import static me.chanjar.weixin.cp.constant.WxCpConsts.GroupRobotMsgType;
 /**
  * 企业微信群机器人消息发送api 实现
  *
- * @author yr
- * @date 2020-08-20
+ * @author yr  created on  2020-08-20
  */
 @RequiredArgsConstructor
 public class WxCpGroupRobotServiceImpl implements WxCpGroupRobotService {
@@ -41,6 +40,11 @@ public class WxCpGroupRobotServiceImpl implements WxCpGroupRobotService {
   @Override
   public void sendMarkdown(String content) throws WxErrorException {
     this.sendMarkdown(this.getWebhookUrl(), content);
+  }
+
+  @Override
+  public void sendMarkdownV2(String content) throws WxErrorException {
+    this.sendMarkdownV2(this.getWebhookUrl(), content);
   }
 
   @Override
@@ -72,6 +76,14 @@ public class WxCpGroupRobotServiceImpl implements WxCpGroupRobotService {
   }
 
   @Override
+  public void sendMarkdownV2(String webhookUrl, String content) throws WxErrorException {
+    this.cpService.postWithoutToken(webhookUrl, new WxCpGroupRobotMessage()
+      .setMsgType(GroupRobotMsgType.MARKDOWN_V2)
+      .setContent(content)
+      .toJson());
+  }
+
+  @Override
   public void sendImage(String webhookUrl, String base64, String md5) throws WxErrorException {
     this.cpService.postWithoutToken(webhookUrl, new WxCpGroupRobotMessage()
       .setMsgType(GroupRobotMsgType.IMAGE)
@@ -91,6 +103,19 @@ public class WxCpGroupRobotServiceImpl implements WxCpGroupRobotService {
     this.cpService.postWithoutToken(webhookUrl, new WxCpGroupRobotMessage()
       .setMsgType(GroupRobotMsgType.FILE)
       .setMediaId(mediaId).toJson());
+  }
+
+
+  @Override
+  public void sendVoice(String webhookUrl, String mediaId) throws WxErrorException {
+    this.cpService.postWithoutToken(webhookUrl, new WxCpGroupRobotMessage()
+      .setMsgType(GroupRobotMsgType.VOICE)
+      .setMediaId(mediaId).toJson());
+  }
+
+  @Override
+  public void sendTemplateCardMessage(String webhookUrl, WxCpGroupRobotMessage wxCpGroupRobotMessage) throws WxErrorException {
+    this.cpService.postWithoutToken(webhookUrl, wxCpGroupRobotMessage.toJson());
   }
 
 }

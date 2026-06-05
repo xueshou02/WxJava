@@ -39,6 +39,8 @@ public class WxMpRedisConfigImpl extends WxMpDefaultConfigImpl {
 
   /**
    * 每个公众号生成独有的存储key.
+   *
+   * @param appId 公众号appId
    */
   @Override
   public void setAppId(String appId) {
@@ -68,7 +70,7 @@ public class WxMpRedisConfigImpl extends WxMpDefaultConfigImpl {
 
   @Override
   public synchronized void updateAccessToken(String accessToken, int expiresInSeconds) {
-    redisOps.setValue(this.accessTokenKey, accessToken, expiresInSeconds - 200, TimeUnit.SECONDS);
+    redisOps.setValue(this.accessTokenKey, accessToken, expiresInSeconds, TimeUnit.SECONDS);
   }
 
   @Override

@@ -2,6 +2,7 @@ package me.chanjar.weixin.cp.api;
 
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.bean.article.NewArticle;
+import me.chanjar.weixin.cp.bean.message.WxCpGroupRobotMessage;
 
 import java.util.List;
 
@@ -10,8 +11,7 @@ import java.util.List;
  * 文档地址：https://work.weixin.qq.com/help?doc_id=13376
  * 调用地址：https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=
  *
- * @author yr
- * @date 2020-8-20
+ * @author yr  created on  2020-8-20
  */
 public interface WxCpGroupRobotService {
 
@@ -71,6 +71,23 @@ public interface WxCpGroupRobotService {
   void sendMarkdown(String webhookUrl, String content) throws WxErrorException;
 
   /**
+   * 发送markdown_v2类型的消息
+   *
+   * @param content markdown内容，最长不超过4096个字节，必须是utf8编码
+   * @throws WxErrorException 异常
+   */
+  void sendMarkdownV2(String content) throws WxErrorException;
+
+  /**
+   * 发送markdown_v2类型的消息
+   *
+   * @param webhookUrl webhook地址
+   * @param content    markdown内容，最长不超过4096个字节，必须是utf8编码
+   * @throws WxErrorException 异常
+   */
+  void sendMarkdownV2(String webhookUrl, String content) throws WxErrorException;
+
+  /**
    * 发送image类型的消息
    *
    * @param webhookUrl webhook地址
@@ -92,9 +109,28 @@ public interface WxCpGroupRobotService {
   /**
    * 发送文件类型的消息
    *
-   * @param webhookUrl  webhook地址
-   * @param mediaId 文件id
+   * @param webhookUrl webhook地址
+   * @param mediaId    文件id
    * @throws WxErrorException 异常
    */
   void sendFile(String webhookUrl, String mediaId) throws WxErrorException;
+
+  /**
+   * 发送文件类型的消息
+   *
+   * @param webhookUrl webhook地址
+   * @param mediaId    语音文件id
+   * @throws WxErrorException 异常
+   */
+  void sendVoice(String webhookUrl, String mediaId) throws WxErrorException;
+
+  /**
+   * 发送模板卡片消息
+   *
+   * @param webhookUrl            webhook地址
+   * @param wxCpGroupRobotMessage 群机器人消息
+   * @throws WxErrorException 异常
+   */
+  void sendTemplateCardMessage(String webhookUrl, WxCpGroupRobotMessage wxCpGroupRobotMessage) throws WxErrorException;
+
 }

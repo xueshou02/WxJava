@@ -22,12 +22,12 @@ import java.util.UUID;
 /**
  *
  * @author ecoolper
- * @date 2017/5/5
+ * created on  2017/5/5
  */
 public class QrCodeOkhttpRequestExecutor extends QrCodeRequestExecutor<OkHttpClient, OkHttpProxyInfo> {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  public QrCodeOkhttpRequestExecutor(RequestHttp requestHttp) {
+  public QrCodeOkhttpRequestExecutor(RequestHttp<OkHttpClient, OkHttpProxyInfo> requestHttp) {
     super(requestHttp);
   }
 

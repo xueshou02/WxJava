@@ -2,7 +2,7 @@ package com.github.binarywang.wxpay.bean.ecommerce;
 
 /**
  * @author f00lish
- * @date 2020/09/17
+ * created on  2020/09/17
  */
 
 import com.google.gson.annotations.SerializedName;
@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * 退款结果
@@ -19,7 +18,7 @@ import java.util.Date;
  *  * </pre>
  *
  * @author f00lish
- * @date 2020/09/14
+ * created on  2020/09/14
  */
 @Data
 @NoArgsConstructor
@@ -66,7 +65,7 @@ public class RefundsResult implements Serializable {
    * </pre>
    */
   @SerializedName(value = "create_time")
-  private Date createTime;
+  private String createTime;
 
   /**
    * <pre>
@@ -239,5 +238,23 @@ public class RefundsResult implements Serializable {
     private Integer refundAmount;
 
   }
+
+
+  /**
+   * <pre>
+   * 字段名：退款资金来源
+   * 变量名：refund_account
+   * 是否必填：否
+   * 类型：string（32）
+   * 描述：
+   *   枚举值：
+   * REFUND_SOURCE_PARTNER_ADVANCE : 电商平台垫付
+   * REFUND_SOURCE_SUB_MERCHANT : 二级商户，默认值
+   * 示例值：REFUND_SOURCE_SUB_MERCHANT
+   * </pre>
+   */
+  @SerializedName(value = "refund_account")
+  private String refundAccount;
+
 
 }

@@ -11,7 +11,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -25,7 +24,7 @@ import java.io.IOException;
  * @author ecoolper
  */
 public class MediaImgUploadApacheHttpRequestExecutor extends MediaImgUploadRequestExecutor<CloseableHttpClient, HttpHost> {
-  public MediaImgUploadApacheHttpRequestExecutor(RequestHttp requestHttp) {
+  public MediaImgUploadApacheHttpRequestExecutor(RequestHttp<CloseableHttpClient, HttpHost> requestHttp) {
     super(requestHttp);
   }
 
@@ -47,7 +46,6 @@ public class MediaImgUploadApacheHttpRequestExecutor extends MediaImgUploadReque
       .setMode(HttpMultipartMode.RFC6532)
       .build();
     httpPost.setEntity(entity);
-    httpPost.setHeader("Content-Type", ContentType.MULTIPART_FORM_DATA.toString());
 
     try (CloseableHttpResponse response = requestHttp.getRequestHttpClient().execute(httpPost)) {
       String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
@@ -57,8 +55,6 @@ public class MediaImgUploadApacheHttpRequestExecutor extends MediaImgUploadReque
       }
 
       return WxMediaImgUploadResult.fromJson(responseContent);
-    } finally {
-      httpPost.releaseConnection();
     }
   }
 }

@@ -1,6 +1,6 @@
 package com.github.binarywang.wxpay.service.impl;
 
-import com.github.binarywang.wxpay.bean.ecommerce.SignatureHeader;
+import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.marketing.*;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.MarketingFavorService;
@@ -34,7 +34,9 @@ public class MarketingFavorServiceImpl implements MarketingFavorService {
     String url = String.format("%s/v3/marketing/favor/coupon-stocks", this.payService.getPayBaseUrl());
     RsaCryptoUtil.encryptFields(request, this.payService.getConfig().getVerifier().getValidCertificate());
     String result = this.payService.postV3WithWechatpaySerial(url, GSON.toJson(request));
-    return GSON.fromJson(result, FavorStocksCreateResult.class);
+    FavorStocksCreateResult favorStocksCreateResult = GSON.fromJson(result, FavorStocksCreateResult.class);
+    favorStocksCreateResult.setRawJsonString(result);
+    return favorStocksCreateResult;
   }
 
   @Override
@@ -75,7 +77,9 @@ public class MarketingFavorServiceImpl implements MarketingFavorService {
     String url = String.format("%s/v3/marketing/favor/stocks/%s", this.payService.getPayBaseUrl(), stockId);
     String query = String.format("?stock_creator_mchid=%s", stockCreatorMchid);
     String result = this.payService.getV3(url + query);
-    return GSON.fromJson(result, FavorStocksGetResult.class);
+    FavorStocksGetResult favorStocksGetResult = GSON.fromJson(result, FavorStocksGetResult.class);
+    favorStocksGetResult.setRawJsonString(result);
+    return favorStocksGetResult;
   }
 
   @Override
@@ -83,7 +87,9 @@ public class MarketingFavorServiceImpl implements MarketingFavorService {
     String url = String.format("%s/v3/marketing/favor/users/%s/coupons/%s", this.payService.getPayBaseUrl(), openid, couponId);
     String query = String.format("?appid=%s", appid);
     String result = this.payService.getV3(url + query);
-    return GSON.fromJson(result, FavorCouponsGetResult.class);
+    FavorCouponsGetResult favorCouponsGetResult = GSON.fromJson(result, FavorCouponsGetResult.class);
+    favorCouponsGetResult.setRawJsonString(result);
+    return favorCouponsGetResult;
   }
 
   @Override
@@ -169,22 +175,9 @@ public class MarketingFavorServiceImpl implements MarketingFavorService {
     return GSON.fromJson(result, FavorStocksRestartResult.class);
   }
 
-  /**
-   * 校验通知签名
-   *
-   * @param header 通知头信息
-   * @param data   通知数据
-   * @return true:校验通过 false:校验不通过
-   */
-  private boolean verifyNotifySign(SignatureHeader header, String data) {
-    String beforeSign = String.format("%s\n%s\n%s\n", header.getTimeStamp(), header.getNonce(), data);
-    return payService.getConfig().getVerifier().verify(header.getSerialNo(),
-      beforeSign.getBytes(StandardCharsets.UTF_8), header.getSigned());
-  }
-
   @Override
   public UseNotifyData parseNotifyData(String data, SignatureHeader header) throws WxPayException {
-    if (Objects.nonNull(header) && !this.verifyNotifySign(header, data)) {
+    if (Objects.nonNull(header) && !payService.verifyNotifySign(header, data)) {
       throw new WxPayException("非法请求，头部信息验证失败");
     }
     return GSON.fromJson(data, UseNotifyData.class);

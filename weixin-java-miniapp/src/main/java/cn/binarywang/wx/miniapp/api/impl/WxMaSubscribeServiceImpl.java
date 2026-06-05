@@ -2,12 +2,16 @@ package cn.binarywang.wx.miniapp.api.impl;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.api.WxMaSubscribeService;
+import cn.binarywang.wx.miniapp.bean.WxMaGetUserNotifyRequest;
+import cn.binarywang.wx.miniapp.bean.WxMaGetUserNotifyResult;
+import cn.binarywang.wx.miniapp.bean.WxMaServiceNotifyExtRequest;
+import cn.binarywang.wx.miniapp.bean.WxMaServiceNotifyRequest;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.bean.subscribemsg.CategoryData;
 import me.chanjar.weixin.common.bean.subscribemsg.PubTemplateKeyword;
 import me.chanjar.weixin.common.bean.subscribemsg.TemplateInfo;
 import me.chanjar.weixin.common.bean.subscribemsg.PubTemplateTitleListResult;
-import cn.binarywang.wx.miniapp.constant.WxMaConstants;
 import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -27,7 +31,7 @@ import static cn.binarywang.wx.miniapp.constant.WxMaApiUrlConstants.Subscribe.*;
 
 /**
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
- * @date 2019-12-15
+ * created on  2019-12-15
  */
 @RequiredArgsConstructor
 public class WxMaSubscribeServiceImpl implements WxMaSubscribeService {
@@ -85,8 +89,36 @@ public class WxMaSubscribeServiceImpl implements WxMaSubscribeService {
   public void sendSubscribeMsg(WxMaSubscribeMessage subscribeMessage) throws WxErrorException {
     String responseContent = this.service.post(SUBSCRIBE_MSG_SEND_URL, subscribeMessage.toJson());
     JsonObject jsonObject = GsonParser.parse(responseContent);
-    if (jsonObject.get(WxMaConstants.ERRCODE).getAsInt() != 0) {
+    if (jsonObject.get(WxConsts.ERR_CODE).getAsInt() != 0) {
       throw new WxErrorException(WxError.fromJson(responseContent, WxType.MiniApp));
     }
+  }
+
+  @Override
+  public void setUserNotify(WxMaServiceNotifyRequest request) throws WxErrorException {
+    String responseContent = this.service.post(SERVICE_NOTIFY_SET_URL, request.toJson());
+    JsonObject jsonObject = GsonParser.parse(responseContent);
+    if (jsonObject.get(WxConsts.ERR_CODE).getAsInt() != 0) {
+      throw new WxErrorException(WxError.fromJson(responseContent, WxType.MiniApp));
+    }
+  }
+
+  @Override
+  public void setUserNotifyExt(WxMaServiceNotifyExtRequest request) throws WxErrorException {
+    String responseContent = this.service.post(SERVICE_NOTIFY_SET_EXT_URL, request.toJson());
+    JsonObject jsonObject = GsonParser.parse(responseContent);
+    if (jsonObject.get(WxConsts.ERR_CODE).getAsInt() != 0) {
+      throw new WxErrorException(WxError.fromJson(responseContent, WxType.MiniApp));
+    }
+  }
+
+  @Override
+  public WxMaGetUserNotifyResult getUserNotify(WxMaGetUserNotifyRequest request) throws WxErrorException {
+    String responseContent = this.service.post(SERVICE_NOTIFY_GET_URL, request.toJson());
+    JsonObject jsonObject = GsonParser.parse(responseContent);
+    if (jsonObject.get(WxConsts.ERR_CODE).getAsInt() != 0) {
+      throw new WxErrorException(WxError.fromJson(responseContent, WxType.MiniApp));
+    }
+    return WxMaGsonBuilder.create().fromJson(responseContent, WxMaGetUserNotifyResult.class);
   }
 }

@@ -2,13 +2,15 @@ package cn.binarywang.wx.miniapp.config.impl;
 
 import cn.binarywang.wx.miniapp.config.WxMaConfig;
 import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
-import lombok.Getter;
-import me.chanjar.weixin.common.bean.WxAccessToken;
-import me.chanjar.weixin.common.util.http.apache.ApacheHttpClientBuilder;
-
 import java.io.File;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import me.chanjar.weixin.common.bean.WxAccessTokenEntity;
+import me.chanjar.weixin.common.util.http.apache.ApacheHttpClientBuilder;
 
 /**
  * 基于内存的微信配置provider，在实际生产环境中应该将这些配置持久化
@@ -19,24 +21,33 @@ import java.util.concurrent.locks.ReentrantLock;
 public class WxMaDefaultConfigImpl implements WxMaConfig {
   protected volatile String appid;
   protected volatile String token;
-  /**
-   * 小程序原始ID
-   */
+
+  /** 是否使用稳定版获取accessToken接口 */
+  @Getter(value = AccessLevel.NONE)
+  private boolean useStableAccessToken;
+
+  /** 小程序原始ID */
   protected volatile String originalId;
+
   protected Lock accessTokenLock = new ReentrantLock();
-  /**
-   * 临时文件目录.
-   */
+
+  /** 临时文件目录. */
   protected volatile File tmpDirFile;
+
   private volatile String msgDataFormat;
   private volatile String secret;
   private volatile String accessToken;
   private volatile String aesKey;
   private volatile long expiresTime;
-  /**
-   * 云环境ID
-   */
+  private volatile String apiSignatureRsaPrivateKey;
+  private volatile String apiSignatureAesKey;
+  private volatile String apiSignatureRsaPrivateKeySn;
+  private volatile String apiSignatureAesKeySn;
+  private volatile String wechatMpAppid;
+
+  /** 云环境ID */
   private volatile String cloudEnv;
+
   private volatile String httpProxyHost;
   private volatile int httpProxyPort;
   private volatile String httpProxyUsername;
@@ -47,26 +58,39 @@ public class WxMaDefaultConfigImpl implements WxMaConfig {
 
   private volatile String jsapiTicket;
   private volatile long jsapiTicketExpiresTime;
-  /**
-   * 微信卡券的ticket单独缓存.
-   */
+
+  /** 微信卡券的ticket单独缓存. */
   private volatile String cardApiTicket;
+
   private volatile long cardApiTicketExpiresTime;
   protected volatile Lock jsapiTicketLock = new ReentrantLock();
   protected volatile Lock cardApiTicketLock = new ReentrantLock();
   private volatile ApacheHttpClientBuilder apacheHttpClientBuilder;
   private String apiHostUrl;
+  private String accessTokenUrl;
 
-  /**
-   * 会过期的数据提前过期时间，默认预留200秒的时间
-   */
+  /** 是否使用微信云托管模式（使用 HTTP 协议访问内网地址） */
+  @Getter(AccessLevel.NONE)
+  private boolean useWxCloudRun = false;
+
+  /** 自定义配置token的消费者 */
+  @Setter private Consumer<WxAccessTokenEntity> updateAccessTokenBefore;
+
+  /** 开启回调 */
+  @Getter(AccessLevel.NONE)
+  private boolean enableUpdateAccessTokenBefore = true;
+
+  /** 可临时关闭更新token回调，主要用于其他介质初始化数据时，可不进行回调 */
+  public void enableUpdateAccessTokenBefore(boolean enableUpdateAccessTokenBefore) {
+    this.enableUpdateAccessTokenBefore = enableUpdateAccessTokenBefore;
+  }
+
+  /** 会过期的数据提前过期时间，默认预留200秒的时间 */
   protected long expiresAheadInMillis(int expiresInSeconds) {
     return System.currentTimeMillis() + (expiresInSeconds - 200) * 1000L;
   }
 
-  /**
-   * 判断 expiresTime 是否已经过期
-   */
+  /** 判断 expiresTime 是否已经过期 */
   protected boolean isExpired(long expiresTime) {
     return System.currentTimeMillis() > expiresTime;
   }
@@ -79,6 +103,19 @@ public class WxMaDefaultConfigImpl implements WxMaConfig {
   public void setAccessToken(String accessToken) {
     this.accessToken = accessToken;
   }
+
+  // region 使用稳定版接口获取accessToken
+  @Override
+  public boolean isStableAccessToken() {
+    return this.useStableAccessToken;
+  }
+
+  @Override
+  public void useStableAccessToken(boolean useStableAccessToken) {
+    this.useStableAccessToken = useStableAccessToken;
+  }
+
+  // endregion
 
   @Override
   public Lock getAccessTokenLock() {
@@ -94,15 +131,22 @@ public class WxMaDefaultConfigImpl implements WxMaConfig {
     return isExpired(this.expiresTime);
   }
 
-  @Override
-  public synchronized void updateAccessToken(WxAccessToken accessToken) {
-    updateAccessToken(accessToken.getAccessToken(), accessToken.getExpiresIn());
-  }
+  //  @Override
+  //  public synchronized void updateAccessToken(WxAccessToken accessToken) {
+  //    updateAccessToken(accessToken.getAccessToken(), accessToken.getExpiresIn());
+  //  }
 
   @Override
   public synchronized void updateAccessToken(String accessToken, int expiresInSeconds) {
     setAccessToken(accessToken);
     setExpiresTime(expiresAheadInMillis(expiresInSeconds));
+  }
+
+  @Override
+  public void updateAccessTokenBefore(WxAccessTokenEntity wxAccessTokenEntity) {
+    if (updateAccessTokenBefore != null && enableUpdateAccessTokenBefore) {
+      updateAccessTokenBefore.accept(wxAccessTokenEntity);
+    }
   }
 
   @Override
@@ -196,6 +240,46 @@ public class WxMaDefaultConfigImpl implements WxMaConfig {
 
   public void setAesKey(String aesKey) {
     this.aesKey = aesKey;
+  }
+
+  public String getApiSignatureRsaPrivateKey() {
+    return apiSignatureRsaPrivateKey;
+  }
+
+  public void setApiSignatureRsaPrivateKey(String apiSignatureRsaPrivateKey) {
+    this.apiSignatureRsaPrivateKey = apiSignatureRsaPrivateKey;
+  }
+
+  public String getApiSignatureAesKey() {
+    return apiSignatureAesKey;
+  }
+
+  public void setApiSignatureAesKey(String apiSignatureAesKey) {
+    this.apiSignatureAesKey = apiSignatureAesKey;
+  }
+
+  public String getApiSignatureRsaPrivateKeySn() {
+    return apiSignatureRsaPrivateKeySn;
+  }
+
+  public void setApiSignatureRsaPrivateKeySn(String apiSignatureRsaPrivateKeySn) {
+    this.apiSignatureRsaPrivateKeySn = apiSignatureRsaPrivateKeySn;
+  }
+
+  public String getApiSignatureAesKeySn() {
+    return apiSignatureAesKeySn;
+  }
+
+  public void setApiSignatureAesKeySn(String apiSignatureAesKeySn) {
+    this.apiSignatureAesKeySn = apiSignatureAesKeySn;
+  }
+
+  public String getWechatMpAppid() {
+    return wechatMpAppid == null ? appid : wechatMpAppid;
+  }
+
+  public void setWechatMpAppid(String wechatMpAppid) {
+    this.wechatMpAppid = wechatMpAppid;
   }
 
   @Override
@@ -301,6 +385,21 @@ public class WxMaDefaultConfigImpl implements WxMaConfig {
   @Override
   public void setApiHostUrl(String apiHostUrl) {
     this.apiHostUrl = apiHostUrl;
+  }
+
+  @Override
+  public void setAccessTokenUrl(String accessTokenUrl) {
+    this.accessTokenUrl = accessTokenUrl;
+  }
+
+  @Override
+  public boolean isUseWxCloudRun() {
+    return this.useWxCloudRun;
+  }
+
+  @Override
+  public void setUseWxCloudRun(boolean useWxCloudRun) {
+    this.useWxCloudRun = useWxCloudRun;
   }
 
   @Override

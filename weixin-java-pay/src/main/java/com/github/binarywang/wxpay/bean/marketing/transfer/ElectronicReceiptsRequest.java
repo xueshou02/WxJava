@@ -15,12 +15,12 @@ import java.io.Serializable;
  * 接口规则：https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay-1.shtml
  *
  * @author xiaoqiang
- * @date 2021-12-06
+ * created on  2021-12-06
  */
 @Data
 @NoArgsConstructor
 public class ElectronicReceiptsRequest implements Serializable {
-  public static final float serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
   /**
    * <pre>
    * 字段名：受理类型

@@ -24,13 +24,20 @@ public class WxMpDefaultConfigImpl implements WxMpConfigStorage, Serializable {
 
   protected volatile String appId;
   protected volatile String secret;
+  /**
+   * 是否使用稳定版 Access Token
+   */
+  private boolean useStableAccessToken;
   protected volatile String token;
   protected volatile String templateId;
   protected volatile String accessToken;
   protected volatile String aesKey;
   protected volatile long expiresTime;
 
+  @Deprecated
   protected volatile String oauth2redirectUri;
+  protected volatile String oauth2RedirectUrl;
+  protected volatile String qrConnectRedirectUrl;
 
   protected volatile String httpProxyHost;
   protected volatile int httpProxyPort;
@@ -59,6 +66,16 @@ public class WxMpDefaultConfigImpl implements WxMpConfigStorage, Serializable {
   protected volatile ApacheHttpClientBuilder apacheHttpClientBuilder;
 
   private WxMpHostConfig hostConfig = null;
+
+  @Override
+  public boolean isStableAccessToken() {
+    return this.useStableAccessToken;
+  }
+
+  @Override
+  public void useStableAccessToken(boolean useStableAccessToken) {
+    this.useStableAccessToken = useStableAccessToken;
+  }
 
   @Override
   public boolean isAccessTokenExpired() {

@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * @author chenliang
- * @date 2021-08-02 5:42 下午
+ * created on  2021-08-02 5:42 下午
  *
  * <pre>
  *   代扣订单查询结果
@@ -147,7 +147,7 @@ public class WxWithholdOrderQueryResult extends BaseWxPayResult implements Seria
     if (this.couponCount == null || this.couponCount == 0) {
       return;
     }
-    this.couponList = new ArrayList(couponCount);
+    this.couponList = new ArrayList<>(couponCount);
     for (int i = 0; i < this.couponCount; i++) {
       WxPayOrderNotifyCoupon coupon = new WxPayOrderNotifyCoupon();
       coupon.setCouponId(this.getXmlValue("xml/coupon_id_" + i));

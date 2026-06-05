@@ -4,7 +4,6 @@ import jodd.http.HttpConnectionProvider;
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import jodd.http.ProxyInfo;
-import jodd.util.StringPool;
 import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.RequestHttp;
@@ -17,10 +16,10 @@ import java.nio.charset.StandardCharsets;
  * .
  *
  * @author ecoolper
- * @date 2017/5/4
+ * created on  2017/5/4
  */
 public class JoddHttpSimpleGetRequestExecutor extends SimpleGetRequestExecutor<HttpConnectionProvider, ProxyInfo> {
-  public JoddHttpSimpleGetRequestExecutor(RequestHttp requestHttp) {
+  public JoddHttpSimpleGetRequestExecutor(RequestHttp<HttpConnectionProvider, ProxyInfo> requestHttp) {
     super(requestHttp);
   }
 

@@ -20,10 +20,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.jedis.util.Pool;
 
 import java.util.Set;
 
@@ -80,7 +81,7 @@ public class WxQidianStorageAutoConfiguration {
   }
 
   private WxQidianConfigStorage jedisConfigStorage() {
-    JedisPoolAbstract jedisPool;
+    Pool<Jedis> jedisPool;
     if (StringUtils.isNotEmpty(redisHost) || StringUtils.isNotEmpty(redisHost2)) {
       jedisPool = getJedisPool();
     } else {
@@ -136,7 +137,7 @@ public class WxQidianStorageAutoConfiguration {
     }
   }
 
-  private JedisPoolAbstract getJedisPool() {
+  private Pool<Jedis> getJedisPool() {
     WxQidianProperties.ConfigStorage storage = wxQidianProperties.getConfigStorage();
     RedisProperties redis = storage.getRedis();
 
@@ -156,8 +157,9 @@ public class WxQidianStorageAutoConfiguration {
     config.setTestOnBorrow(true);
     config.setTestWhileIdle(true);
     if (StringUtils.isNotEmpty(redis.getSentinelIps())) {
+
       Set<String> sentinels = Sets.newHashSet(redis.getSentinelIps().split(","));
-      return new JedisSentinelPool(redis.getSentinelName(), sentinels);
+      return new JedisSentinelPool(redis.getSentinelName(), sentinels,config);
     }
 
     return new JedisPool(config, redis.getHost(), redis.getPort(), redis.getTimeout(), redis.getPassword(),

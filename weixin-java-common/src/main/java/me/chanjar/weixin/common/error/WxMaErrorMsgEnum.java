@@ -46,23 +46,23 @@ public enum WxMaErrorMsgEnum {
    */
   CODE_40003(40003, "openid 不正确"),
   /**
-   * <pre>
    * 无效媒体文件类型
-   * 对应操作：<code>uploadTempMedia</code>
+   * <p>
+   * 对应操作：{@code uploadTempMedia}
    * 对应地址：
-   * POST https://api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE
+   * {@code POST https://api.weixin.qq.com/cgi-bin/media/upload?access_token=ACCESS_TOKEN&type=TYPE}
    * 参考文档地址： https://developers.weixin.qq.com/miniprogram/dev/api/open-api/customer-message/uploadTempMedia.html
-   * </pre>
+   * </p>
    */
   CODE_40004(40004, "无效媒体文件类型"),
   /**
-   * <pre>
    * 无效媒体文件 ID.
-   * 对应操作：<code>getTempMedia</code>
+   * <p>
+   * 对应操作：{@code getTempMedia}
    * 对应地址：
-   * GET https://api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID
+   * {@code GET https://api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID}
    * 参考文档地址： https://developers.weixin.qq.com/miniprogram/dev/api/open-api/customer-message/getTempMedia.html
-   * </pre>
+   * </p>
    */
   CODE_40007(40007, "无效媒体文件 ID"),
   /**
@@ -70,11 +70,10 @@ public enum WxMaErrorMsgEnum {
    * appid不正确，或者不符合绑定关系要求.
    * 对应操作：<code>sendUniformMessage</code>
    * 对应地址：
-   * POST https://api.weixin.qq.com/cgi-bin/message/wxopen/template/uniform_send?access_token=ACCESS_TOKEN
-   * 参考文档地址： https://developers.weixin.qq.com/miniprogram/dev/api/open-api/uniform-message/sendUniformMessage.html
+   * 参考文档地址： https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/clearQuota.html
    * </pre>
    */
-  CODE_40013(40013, "appid不正确，或者不符合绑定关系要求"),
+  CODE_40013(40013, "appid不正确/不合法(避免异常字符,注意大小写)，或者不符合绑定关系要求"),
   /**
    * <pre>
    * template_id 不正确.
@@ -100,29 +99,29 @@ public enum WxMaErrorMsgEnum {
    */
   CODE_41028(41028, "form_id 不正确，或者过期"),
   /**
-   * <pre>
    * code 或 template_id 不正确.
-   * 对应操作：<code>code2Session</code>, <code>sendUniformMessage</code>, <code>sendTemplateMessage</code>
+   * <p>
+   * 对应操作：{@code code2Session}, {@code sendUniformMessage}, {@code sendTemplateMessage}
    * 对应地址：
-   * GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
+   * {@code GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code}
    * POST https://api.weixin.qq.com/cgi-bin/message/wxopen/template/uniform_send?access_token=ACCESS_TOKEN
    * POST https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=ACCESS_TOKEN
    * 参考文档地址： https://developers.weixin.qq.com/miniprogram/dev/api/open-api/login/code2Session.html
    * https://developers.weixin.qq.com/miniprogram/dev/api/open-api/uniform-message/sendUniformMessage.html
    * https://developers.weixin.qq.com/miniprogram/dev/api/open-api/template-message/sendTemplateMessage.html
-   * </pre>
+   * </p>
    */
   CODE_41029(41029, "请求的参数不正确"),
   /**
-   * <pre>
    * form_id 已被使用，或者所传page页面不存在，或者小程序没有发布
-   * 对应操作：<code>sendUniformMessage</coce>, <code>getWXACodeUnlimit</code>
+   * <p>
+   * 对应操作：{@code sendUniformMessage}, {@code getWXACodeUnlimit}
    * 对应地址：
    * POST https://api.weixin.qq.com/cgi-bin/message/wxopen/template/uniform_send?access_token=ACCESS_TOKEN
    * POST https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=ACCESS_TOKEN
    * 参考文档地址： https://developers.weixin.qq.com/miniprogram/dev/api/open-api/uniform-message/sendUniformMessage.html
-   *  https://developers.weixin.qq.com/miniprogram/dev/api/open-api/qr-code/getWXACodeUnlimit.html
-   * </pre>
+   * https://developers.weixin.qq.com/miniprogram/dev/api/open-api/qr-code/getWXACodeUnlimit.html
+   * </p>
    */
   CODE_41030(41030, "请求的参数不正确"),
   /**
@@ -139,13 +138,13 @@ public enum WxMaErrorMsgEnum {
    */
   CODE_45009(45009, "调用分钟频率受限"),
   /**
-   * <pre>
    * 频率限制，每个用户每分钟100次.
-   * 对应操作：<code>code2Session</code>
+   * <p>
+   * 对应操作：{@code code2Session}
    * 对应地址：
-   * GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
+   * {@code GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code}
    * 参考文档地址： https://developers.weixin.qq.com/miniprogram/dev/api/open-api/login/code2Session.html
-   * </pre>
+   * </p>
    */
   CODE_45011(45011, "频率限制，每个用户每分钟100次"),
   /**
@@ -191,12 +190,13 @@ public enum WxMaErrorMsgEnum {
    */
   CODE_45072(45072, "command字段取值不对"),
   /**
-   * <pre>
    * 下发输入状态，需要之前30秒内跟用户有过消息交互.
-   * 对应操作：<code>customerTyping</code>
+   * <p>
+   * 对应操作：{@code customerTyping}
    * 对应地址：
    * POST https://api.weixin.qq.com/cgi-bin/message/custom/typing?access_token=ACCESS_TOKEN
    * 参考文档地址： https://developers.weixin.qq.com/miniprogram/dev/api/open-api/customer-message/customerTyping.html
+   * </p>
    */
   CODE_45080(45080, "下发输入状态，需要之前30秒内跟用户有过消息交互"),
   /**
@@ -267,6 +267,50 @@ public enum WxMaErrorMsgEnum {
    * activity_id 过期.
    */
   CODE_47504(47504, "activity_id 过期"),
+  /**
+   * api 禁止清零调用次数，因为清零次数达到上限
+   *
+   * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/clearQuota.html">参考文档</a>
+   */
+  CODE_48006(48006, "api 禁止清零调用次数，因为清零次数达到上限"),
+
+  /**
+   * rid不存在
+   *
+   * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/getRidInfo.html">参考文档</a>
+   */
+  CODE_76001(76001, "rid不存在"),
+  /**
+   * rid为空或者格式错误
+   *
+   * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/getRidInfo.html">参考文档</a>
+   */
+  CODE_76002(76002, "rid为空或者格式错误"),
+  /**
+   * 当前账号无权查询该rid，该rid属于其他账号调用所产生
+   *
+   * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/getRidInfo.html">参考文档</a>
+   */
+  CODE_76003(76003, "当前账号无权查询该rid，该rid属于其他账号调用所产生"),
+  /**
+   * rid过期
+   *
+   * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/getRidInfo.html">参考文档</a>
+   */
+  CODE_76004(76004, "rid过期，仅支持持续7天内的rid"),
+  /**
+   * cgi_path填错了
+   *
+   * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/getApiQuota.html">参考文档</a>
+   */
+  CODE_76021(76021, "cgi_path填错了"),
+  /**
+   * 当前调用接口使用的token与api所属账号不符
+   *
+   * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/getApiQuota.html">参考文档</a>
+   */
+  CODE_76022(76022, "当前调用接口使用的token与api所属账号不符，详情可看注意事项的说明"),
+
   /**
    * 没有绑定开放平台帐号.
    */
@@ -343,6 +387,17 @@ public enum WxMaErrorMsgEnum {
   CODE_91017(91017, "+号规则 不同类型关联名主体不一致"),
 
   CODE_40097(40097, "参数错误"),
+  /**
+   * 缺少 appid 参数
+   * <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/clearQuotaByAppSecret.html">参考文档</a>
+   */
+  CODE_41002(41002, "缺少 appid 参数"),
+  /**
+   * 缺少 secret 参数
+   * <a href="https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/openApi-mgnt/clearQuotaByAppSecret.html">参考文档</a>
+   */
+  CODE_41004(41004, "缺少 secret 参数"),
+
 
   CODE_41006(41006, "media_id 不能为空"),
 
@@ -632,7 +687,7 @@ public enum WxMaErrorMsgEnum {
 
   /**
    * 89252
-   * 法人&企业信息一致性校验中 front checking
+   * {@code 法人&企业信息一致性校验中 front checking}
    */
   CODE_89252(89252, "法人&企业信息一致性校验中"),
 
@@ -657,6 +712,160 @@ public enum WxMaErrorMsgEnum {
   CODE_89255(89255, "code参数无效，请检查code长度以及内容是否正确_；注意code_type的值不同需要传的code长度不一样 ；注意code_type的值不同需要传的code长度不一样"),
 
 //  CODE_504002(-504002, "云函数未找到 Function not found"),
+
+  /**
+   * 半屏小程序系统错误
+   */
+  CODE_89408(89408, "半屏小程序系统错误"),
+
+  /**
+   * 获取半屏小程序列表参数错误
+   */
+  CODE_89409(89409, "获取半屏小程序列表参数错误"),
+
+  /**
+   * 添加半屏小程序appid参数错误
+   */
+  CODE_89410(89410, "添加半屏小程序appid参数错误"),
+
+  /**
+   * 添加半屏小程序appid参数为空
+   */
+  CODE_89411(89411, "添加半屏小程序appid参数为空"),
+
+  /**
+   * 添加半屏小程序申请理由不得超过30个字
+   */
+  CODE_89412(89412, "添加半屏小程序申请理由不得超过30个字"),
+
+  /**
+   * 该小程序被申请次数已达24h限制
+   */
+  CODE_89413(89413, "该小程序被申请次数已达24h限制"),
+
+  /**
+   * 每天仅允许申请50次半屏小程序
+   */
+  CODE_89414(89414, "每天仅允许申请50次半屏小程序"),
+
+  /**
+   * 删除半屏小程序appid参数为空
+   */
+  CODE_89415(89415, "删除半屏小程序appid参数为空"),
+
+  /**
+   * 取消半屏小程序授权appid参数为空
+   */
+  CODE_89416(89416, "取消半屏小程序授权appid参数为空"),
+
+  /**
+   * 修改半屏小程序方式flag参数错误
+   */
+  CODE_89417(89417, "修改半屏小程序方式flag参数错误"),
+
+  /**
+   * 获取半屏小程序每日申请次数失败
+   */
+  CODE_89418(89418, "获取半屏小程序每日申请次数失败"),
+
+  /**
+   * 获取半屏小程序每日授权次数失败
+   */
+  CODE_89419(89419, "获取半屏小程序每日授权次数失败"),
+
+  /**
+   * 不支持添加个人主体小程序
+   */
+  CODE_89420(89420, "不支持添加个人主体小程序"),
+
+  /**
+   * 删除数据未找到
+   */
+  CODE_89421(89421, "删除数据未找到"),
+
+  /**
+   * 删除状态异常
+   */
+  CODE_89422(89422, "删除状态异常"),
+
+  /**
+   * 申请次数添加到达上限
+   */
+  CODE_89423(89423, "申请次数添加到达上限"),
+
+  /**
+   * 申请添加已超时
+   */
+  CODE_89425(89425, "申请添加已超时"),
+
+  /**
+   * 申请添加状态异常
+   */
+  CODE_89426(89426, "申请添加状态异常"),
+
+  /**
+   * 申请号和授权号相同
+   */
+  CODE_89427(89427, "申请号和授权号相同"),
+
+  /**
+   * 该小程序已申请，不允许重复添加
+   */
+  CODE_89428(89428, "该小程序已申请，不允许重复添加"),
+
+  /**
+   * 已到达同一小程序每日最多申请次数
+   */
+  CODE_89429(89429, "已到达同一小程序每日最多申请次数"),
+
+  /**
+   * 该小程序已设置自动拒绝申请
+   */
+  CODE_89430(89430, "该小程序已设置自动拒绝申请"),
+
+  /**
+   * 不支持此类型小程序
+   */
+  CODE_89431(89431, "不支持此类型小程序"),
+
+  /**
+   * 不是小程序
+   */
+  CODE_89432(89432, "不是小程序"),
+
+  /**
+   * 授权次数到达上限
+   */
+  CODE_89424(89424, "授权次数到达上限"),
+
+  /**
+   * 微信小程序虚拟支付错误码
+   *
+   * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/server/API/VirtualPayment/api_query_order.html">虚拟支付 API 文档</a>
+   */
+  CODE_268490001(268490001, "openid错误"),
+  CODE_268490002(268490002, "请求参数字段错误，具体看errmsg"),
+  CODE_268490003(268490003, "签名错误"),
+  CODE_268490004(268490004, "重复操作（赠送和代币支付和充值广告金相关接口会返回，表示之前的操作已经成功）"),
+  CODE_268490005(268490005, "订单已经通过cancel_currency_pay接口退款，不支持再退款"),
+  CODE_268490006(268490006, "代币的退款/支付操作金额不足"),
+  CODE_268490007(268490007, "图片或文字存在敏感内容，禁止使用"),
+  CODE_268490008(268490008, "代币未发布，不允许进行代币操作"),
+  CODE_268490009(268490009, "用户session_key不存在或已过期，请重新登录"),
+  CODE_268490011(268490011, "数据生成中，请稍后调用本接口获取"),
+  CODE_268490012(268490012, "批量任务运行中，请等待完成后才能再次运行"),
+  CODE_268490013(268490013, "禁止对核销状态的单进行退款"),
+  CODE_268490014(268490014, "退款操作进行中，稍后可以使用相同参数重试"),
+  CODE_268490015(268490015, "频率限制"),
+  CODE_268490016(268490016, "退款的left_fee字段与实际不符，请通过query_order接口查询确认"),
+  CODE_268490018(268490018, "广告金充值账户行业id不匹配"),
+  CODE_268490019(268490019, "广告金充值账户id已绑定其他appid"),
+  CODE_268490020(268490020, "广告金充值账户主体名称错误"),
+  CODE_268490021(268490021, "账户未完成进件"),
+  CODE_268490022(268490022, "广告金充值账户无效"),
+  CODE_268490023(268490023, "广告金余额不足"),
+  CODE_268490024(268490024, "广告金充值金额必须大于0"),
+
   ;
 
   private final int code;

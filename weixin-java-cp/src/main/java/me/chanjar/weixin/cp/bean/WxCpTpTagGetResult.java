@@ -11,6 +11,12 @@ import me.chanjar.weixin.cp.util.json.WxCpGsonBuilder;
 public class WxCpTpTagGetResult extends WxCpTagGetResult {
   private static final long serialVersionUID = 9051748686315562400L;
 
+  /**
+   * Deserialize wx cp tp tag get result.
+   *
+   * @param json the json
+   * @return the wx cp tp tag get result
+   */
   public static WxCpTpTagGetResult deserialize(String json) {
     return WxCpGsonBuilder.create().fromJson(json, WxCpTpTagGetResult.class);
   }

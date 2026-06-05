@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  *
  * @author Daniel Qian
- * @date 14/10/19
+ * created on  14/10/19
  */
 public class SHA1 {
 
@@ -29,7 +29,10 @@ public class SHA1 {
   }
 
   /**
-   * 用&串接arr参数，生成sha1 digest.
+   * {@code 用&串接arr参数，生成sha1 digest.}
+   *
+   * @param arr 参数数组
+   * @return sha1摘要
    */
   public static String genWithAmple(String... arr) {
     if (StringUtils.isAnyEmpty(arr)) {

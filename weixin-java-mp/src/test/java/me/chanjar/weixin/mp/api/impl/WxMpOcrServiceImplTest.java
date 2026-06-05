@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
  * 测试类.
  *
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
- * @date 2019-06-22
+ * created on  2019-06-22
  */
 @Test
 @Guice(modules = ApiTestModule.class)

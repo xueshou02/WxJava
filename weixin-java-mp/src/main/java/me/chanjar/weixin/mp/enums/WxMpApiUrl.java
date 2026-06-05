@@ -130,6 +130,10 @@ public interface WxMpApiUrl {
      */
     GET_ACCESS_TOKEN_URL(API_DEFAULT_HOST_URL, "/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s"),
     /**
+     * 获取稳定版 access_token.
+     */
+    GET_STABLE_ACCESS_TOKEN_URL(API_DEFAULT_HOST_URL, "/cgi-bin/stable_token"),
+    /**
      * 获得各种类型的ticket.
      */
     GET_TICKET_URL(API_DEFAULT_HOST_URL, "/cgi-bin/ticket/getticket?type="),
@@ -309,15 +313,15 @@ public interface WxMpApiUrl {
      */
     GET_PUB_TEMPLATE_KEY_WORDS_BY_ID_URL(API_DEFAULT_HOST_URL, "/wxaapi/newtmpl/getpubtemplatekeywords"),
     /**
-     * 组合模板并添加至帐号下的个人模板库.
+     * 组合模板并添加至账号下的个人模板库.
      */
     TEMPLATE_ADD_URL(API_DEFAULT_HOST_URL, "/wxaapi/newtmpl/addtemplate"),
     /**
-     * 获取当前帐号下的个人模板列表.
+     * 获取当前账号下的个人模板列表.
      */
     TEMPLATE_LIST_URL(API_DEFAULT_HOST_URL, "/wxaapi/newtmpl/gettemplate"),
     /**
-     * 删除帐号下的某个模板.
+     * 删除账号下的某个模板.
      */
     TEMPLATE_DEL_URL(API_DEFAULT_HOST_URL, "/wxaapi/newtmpl/deltemplate"),
     /**

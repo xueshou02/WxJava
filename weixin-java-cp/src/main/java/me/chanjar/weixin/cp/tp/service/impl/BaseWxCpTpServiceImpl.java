@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.bean.WxAccessToken;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.enums.WxType;
@@ -22,15 +23,19 @@ import me.chanjar.weixin.common.util.http.RequestHttp;
 import me.chanjar.weixin.common.util.http.SimpleGetRequestExecutor;
 import me.chanjar.weixin.common.util.http.SimplePostRequestExecutor;
 import me.chanjar.weixin.common.util.json.GsonParser;
+import me.chanjar.weixin.common.util.json.WxGsonBuilder;
 import me.chanjar.weixin.cp.bean.*;
+import me.chanjar.weixin.cp.bean.message.WxCpTpXmlMessage;
 import me.chanjar.weixin.cp.config.WxCpTpConfigStorage;
 import me.chanjar.weixin.cp.tp.service.*;
+import me.chanjar.weixin.cp.util.crypto.WxCpTpCryptUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static me.chanjar.weixin.cp.constant.WxCpApiPathConsts.Tp.*;
@@ -38,6 +43,8 @@ import static me.chanjar.weixin.cp.constant.WxCpApiPathConsts.Tp.*;
 /**
  * .
  *
+ * @param <H> the type parameter
+ * @param <P> the type parameter
  * @author zhenjun cai
  */
 @Slf4j
@@ -50,7 +57,11 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
   private WxCpTpUserService wxCpTpUserService = new WxCpTpUserServiceImpl(this);
   private WxCpTpOrderService wxCpTpOrderService = new WxCpTpOrderServiceImpl(this);
   private WxCpTpEditionService wxCpTpEditionService = new WxCpTpEditionServiceImpl(this);
-
+  private WxCpTpLicenseService wxCpTpLicenseService = new WxCpTpLicenseServiceImpl(this);
+  private WxCpTpIdConvertService wxCpTpIdConvertService = new WxCpTpIdConvertServiceImpl(this);
+  private WxCpTpOAuth2Service wxCpTpOAuth2Service = new WxCpTpOAuth2ServiceImpl(this);
+  private WxCpTpCustomizedService wxCpTpCustomizedService = new WxCpTpCustomizedServiceImpl(this);
+  private WxCpTpMessageService wxCpTpMessageService = new WxCpTpMessageServiceImpl(this);
   /**
    * 全局的是否正在刷新access token的锁.
    */
@@ -72,11 +83,18 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
    */
   protected final Object globalAuthCorpJsApiTicketRefreshLock = new Object();
 
+  /**
+   * The Global provider token refresh lock.
+   */
   protected final Object globalProviderTokenRefreshLock = new Object();
 
+  /**
+   * The Config storage.
+   */
   protected WxCpTpConfigStorage configStorage;
 
-  private WxSessionManager sessionManager = new StandardSessionManager();
+  private final WxSessionManager sessionManager = new StandardSessionManager();
+
 
   /**
    * 临时文件目录.
@@ -91,7 +109,7 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
       return SHA1.gen(this.configStorage.getToken(), timestamp, nonce, data)
         .equals(msgSignature);
     } catch (Exception e) {
-      log.error("Checking signature failed, and the reason is :" + e.getMessage());
+      log.error("Checking signature failed, and the reason is :{}", e.getMessage());
       return false;
     }
   }
@@ -116,7 +134,7 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
   public String getSuiteTicket() throws WxErrorException {
     if (this.configStorage.isSuiteTicketExpired()) {
       // 本地suite ticket 不存在或者过期
-      WxError wxError = WxError.fromJson("{\"errcode\":40085, \"errmsg\":\"invaild suite ticket\"}", WxType.CP);
+      WxError wxError = WxError.fromJson("{\"errcode\":40085, \"errmsg\":\"invalid suite ticket\"}", WxType.CP);
       throw new WxErrorException(wxError);
     }
     return this.configStorage.getSuiteTicket();
@@ -151,7 +169,7 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
         "type=agent_config&access_token=" + this.configStorage.getAccessToken(authCorpId), true);
 
       JsonObject jsonObject = GsonParser.parse(resp);
-      if (jsonObject.get("errcode").getAsInt() == 0) {
+      if (jsonObject.get(WxConsts.ERR_CODE).getAsInt() == 0) {
         String jsApiTicket = jsonObject.get("ticket").getAsString();
         int expiredInSeconds = jsonObject.get("expires_in").getAsInt();
         synchronized (globalJsApiTicketRefreshLock) {
@@ -181,7 +199,7 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
         "access_token=" + this.configStorage.getAccessToken(authCorpId), true);
 
       JsonObject jsonObject = GsonParser.parse(resp);
-      if (jsonObject.get("errcode").getAsInt() == 0) {
+      if (jsonObject.get(WxConsts.ERR_CODE).getAsInt() == 0) {
         String jsApiTicket = jsonObject.get("ticket").getAsString();
         int expiredInSeconds = jsonObject.get("expires_in").getAsInt();
 
@@ -247,10 +265,30 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
   }
 
   @Override
+  public WxCpTpCorp getV2PermanentCode(String authCode) throws WxErrorException {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("auth_code", authCode);
+
+    String result = post(configStorage.getApiUrl(GET_V2_PERMANENT_CODE), jsonObject.toString());
+    jsonObject = GsonParser.parse(result);
+    WxCpTpCorp wxCpTpCorp = WxCpTpCorp.fromJson(jsonObject.get("auth_corp_info").getAsJsonObject().toString());
+    wxCpTpCorp.setPermanentCode(jsonObject.get("permanent_code").getAsString());
+    return wxCpTpCorp;
+  }
+
+  @Override
   public WxCpTpPermanentCodeInfo getPermanentCodeInfo(String authCode) throws WxErrorException {
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("auth_code", authCode);
     String result = post(configStorage.getApiUrl(GET_PERMANENT_CODE), jsonObject.toString());
+    return WxCpTpPermanentCodeInfo.fromJson(result);
+  }
+
+  @Override
+  public WxCpTpPermanentCodeInfo getV2PermanentCodeInfo(String authCode) throws WxErrorException {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("auth_code", authCode);
+    String result = post(configStorage.getApiUrl(GET_V2_PERMANENT_CODE), jsonObject.toString());
     return WxCpTpPermanentCodeInfo.fromJson(result);
   }
 
@@ -312,11 +350,21 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
 
   @Override
   public String post(String url, String postData) throws WxErrorException {
-    return execute(SimplePostRequestExecutor.create(this), url, postData,false);
+    return execute(SimplePostRequestExecutor.create(this), url, postData, false);
   }
 
-  public String post(String url, String postData,boolean withoutSuiteAccessToken) throws WxErrorException {
-    return execute(SimplePostRequestExecutor.create(this), url, postData,withoutSuiteAccessToken);
+  /**
+   * Post string.
+   *
+   * @param url                     the url
+   * @param postData                the post data
+   * @param withoutSuiteAccessToken the without suite access token
+   * @return the string
+   * @throws WxErrorException the wx error exception
+   */
+  @Override
+  public String post(String url, String postData, boolean withoutSuiteAccessToken) throws WxErrorException {
+    return execute(SimplePostRequestExecutor.create(this), url, postData, withoutSuiteAccessToken);
   }
 
   /**
@@ -324,13 +372,26 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
    */
   @Override
   public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data) throws WxErrorException {
-    return execute(executor, uri,  data,false);
+    return execute(executor, uri, data, false);
   }
-  public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data,boolean withoutSuiteAccessToken) throws WxErrorException {
+
+  /**
+   * Execute t.
+   *
+   * @param <T>                     the type parameter
+   * @param <E>                     the type parameter
+   * @param executor                the executor
+   * @param uri                     the uri
+   * @param data                    the data
+   * @param withoutSuiteAccessToken the without suite access token
+   * @return the t
+   * @throws WxErrorException the wx error exception
+   */
+  public <T, E> T execute(RequestExecutor<T, E> executor, String uri, E data, boolean withoutSuiteAccessToken) throws WxErrorException {
     int retryTimes = 0;
     do {
       try {
-        return this.executeInternal(executor, uri, data,withoutSuiteAccessToken);
+        return this.executeInternal(executor, uri, data, withoutSuiteAccessToken);
       } catch (WxErrorException e) {
         if (retryTimes + 1 > this.maxRetryTimes) {
           log.warn("重试达到最大次数【{}】", this.maxRetryTimes);
@@ -360,20 +421,45 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
     throw new WxRuntimeException("微信服务端异常，超出重试次数");
   }
 
+  /**
+   * Execute internal t.
+   *
+   * @param <T>      the type parameter
+   * @param <E>      the type parameter
+   * @param executor the executor
+   * @param uri      the uri
+   * @param data     the data
+   * @return the t
+   * @throws WxErrorException the wx error exception
+   */
   protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data) throws WxErrorException {
-   return  executeInternal( executor, uri,data,false);
+    return executeInternal(executor, uri, data, false);
   }
-  protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data,boolean withoutSuiteAccessToken) throws WxErrorException {
+
+  /**
+   * Execute internal t.
+   *
+   * @param <T>                     the type parameter
+   * @param <E>                     the type parameter
+   * @param executor                the executor
+   * @param uri                     the uri
+   * @param data                    the data
+   * @param withoutSuiteAccessToken the without suite access token
+   * @return the t
+   * @throws WxErrorException the wx error exception
+   */
+  protected <T, E> T executeInternal(RequestExecutor<T, E> executor, String uri, E data,
+                                     boolean withoutSuiteAccessToken) throws WxErrorException {
     E dataForLog = DataUtils.handleDataWithSecret(data);
 
     if (uri.contains("suite_access_token=")) {
       throw new IllegalArgumentException("uri参数中不允许有suite_access_token: " + uri);
     }
     String uriWithAccessToken;
-    if(!withoutSuiteAccessToken){
+    if (!withoutSuiteAccessToken) {
       String suiteAccessToken = getSuiteAccessToken(false);
       uriWithAccessToken = uri + (uri.contains("?") ? "&" : "?") + "suite_access_token=" + suiteAccessToken;
-    }else{
+    } else {
       uriWithAccessToken = uri;
     }
 
@@ -391,7 +477,7 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
       if (error.getErrorCode() == WxCpErrorMsgEnum.CODE_42009.getCode()) {
         // 强制设置wxCpTpConfigStorage它的suite access token过期了，这样在下一次请求里就会刷新suite access token
         this.configStorage.expireSuiteAccessToken();
-        if (this.getWxCpTpConfigStorage().autoRefreshToken()) {
+        if (this.configStorage.autoRefreshToken()) {
           log.warn("即将重新获取新的access_token，错误代码：{}，错误信息：{}", error.getErrorCode(), error.getErrorMsg());
           return this.execute(executor, uri, data);
         }
@@ -425,10 +511,20 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
     this.maxRetryTimes = maxRetryTimes;
   }
 
+  /**
+   * Gets tmp dir file.
+   *
+   * @return the tmp dir file
+   */
   public File getTmpDirFile() {
     return this.tmpDirFile;
   }
 
+  /**
+   * Sets tmp dir file.
+   *
+   * @param tmpDirFile the tmp dir file
+   */
   public void setTmpDirFile(File tmpDirFile) {
     this.tmpDirFile = tmpDirFile;
   }
@@ -463,8 +559,19 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("auth_code", authCode);
     String access_token = getWxCpProviderToken();
-    String responseText = post(configStorage.getApiUrl(GET_LOGIN_INFO) + "?access_token=" + access_token, jsonObject.toString(), true);
+    String responseText = post(configStorage.getApiUrl(GET_LOGIN_INFO) + "?access_token=" + access_token,
+      jsonObject.toString(), true);
     return WxTpLoginInfo.fromJson(responseText);
+  }
+
+  @Override
+  public WxTpCustomizedAuthUrl getCustomizedAuthUrl(String state, List<String> templateIdList) throws WxErrorException {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("state", state);
+    jsonObject.add("templateid_list", WxGsonBuilder.create().toJsonTree(templateIdList).getAsJsonArray());
+
+    String responseText = post(configStorage.getApiUrl(GET_CUSTOMIZED_AUTH_URL) + "?provider_access_token=" + getWxCpProviderToken(), jsonObject.toString(), true);
+    return WxTpCustomizedAuthUrl.fromJson(responseText);
   }
 
   @Override
@@ -477,7 +584,7 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
       //providerAccessToken 的获取不需要suiteAccessToken ,一不必要，二可以提高效率
       WxCpProviderToken wxCpProviderToken =
         WxCpProviderToken.fromJson(this.post(this.configStorage.getApiUrl(GET_PROVIDER_TOKEN)
-          , jsonObject.toString(),true));
+          , jsonObject.toString(), true));
       String providerAccessToken = wxCpProviderToken.getProviderAccessToken();
       Integer expiresIn = wxCpProviderToken.getExpiresIn();
 
@@ -508,22 +615,22 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
   }
 
   @Override
-  public WxCpTpDepartmentService getWxCpTpDepartmentService(){
+  public WxCpTpDepartmentService getWxCpTpDepartmentService() {
     return wxCpTpDepartmentService;
   }
 
   @Override
-  public WxCpTpMediaService getWxCpTpMediaService(){
+  public WxCpTpMediaService getWxCpTpMediaService() {
     return wxCpTpMediaService;
   }
 
   @Override
-  public WxCpTpOAService getWxCpTpOAService(){
+  public WxCpTpOAService getWxCpTpOAService() {
     return wxCpTpOAService;
   }
 
   @Override
-  public WxCpTpUserService getWxCpTpUserService(){
+  public WxCpTpUserService getWxCpTpUserService() {
     return wxCpTpUserService;
   }
 
@@ -547,18 +654,79 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
     this.wxCpTpOAService = wxCpTpOAService;
   }
 
+
+  @Override
+  public WxCpTpLicenseService getWxCpTpLicenseService() {
+    return wxCpTpLicenseService;
+  }
+
+
+  @Override
+  public void setWxCpTpLicenseService(WxCpTpLicenseService wxCpTpLicenseService) {
+    this.wxCpTpLicenseService = wxCpTpLicenseService;
+  }
+
+  @Override
+  public WxCpTpMessageService getWxCpTpMessageService() {
+    return wxCpTpMessageService;
+  }
+
+  @Override
+  public void setWxCpTpMessageService(WxCpTpMessageService wxCpTpMessageService) {
+    this.wxCpTpMessageService = wxCpTpMessageService;
+  }
+
   @Override
   public void setWxCpTpUserService(WxCpTpUserService wxCpTpUserService) {
     this.wxCpTpUserService = wxCpTpUserService;
   }
 
+
+  /**
+   *
+   * @param encryptedXml         the encrypted xml
+   * @param timestamp            the timestamp
+   * @param nonce                the nonce
+   * @param msgSignature         the msg signature
+   * @return                     the wx cp tp xml message
+   */
   @Override
-  public WxCpTpAdmin getAdminList(String authCorpId,Integer agentId) throws WxErrorException{
+  public WxCpTpXmlMessage fromEncryptedXml(String encryptedXml,
+                                            String timestamp, String nonce, String msgSignature) {
+   return WxCpTpXmlMessage.fromEncryptedXml(encryptedXml,this.configStorage,timestamp,nonce,msgSignature);
+  }
+
+  @Override
+  public String getVerifyDecrypt(String sVerifyEchoStr) {
+    WxCpTpCryptUtil cryptUtil = new WxCpTpCryptUtil(this.configStorage);
+    return cryptUtil.decrypt(sVerifyEchoStr);
+  }
+
+  @Override
+  public WxCpTpAdmin getAdminList(String authCorpId, Integer agentId) throws WxErrorException {
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("auth_corpid", authCorpId);
     jsonObject.addProperty("agentid", agentId);
     String result = post(configStorage.getApiUrl(GET_ADMIN_LIST), jsonObject.toString());
     return WxCpTpAdmin.fromJson(result);
+  }
+
+  public WxCpTpAppQrcode getAppQrcode(String suiteId, String appId, String state, Integer style, Integer resultType) throws WxErrorException {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("suite_id", suiteId);
+    jsonObject.addProperty("appid", appId);
+    jsonObject.addProperty("state", state);
+    jsonObject.addProperty("style", style);
+    jsonObject.addProperty("result_type", resultType);
+    String result = post(configStorage.getApiUrl(GET_APP_QRCODE), jsonObject.toString());
+    return WxCpTpAppQrcode.fromJson(result);
+  }
+
+  public WxCpTpCorpId2OpenCorpId corpId2OpenCorpId(String corpId) throws WxErrorException {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("corpid", corpId);
+    String result = post(configStorage.getApiUrl(CORPID_TO_OPENCORPID) +"?provider_access_token=" + getWxCpProviderToken(), jsonObject.toString());
+    return WxCpTpCorpId2OpenCorpId.fromJson(result);
   }
 
   @Override
@@ -632,4 +800,39 @@ public abstract class BaseWxCpTpServiceImpl<H, P> implements WxCpTpService, Requ
     return jsapiSignature;
   }
 
+  @Override
+  public WxCpTpIdConvertService getWxCpTpIdConverService() {
+    return wxCpTpIdConvertService;
+  }
+
+  @Override
+  public void setWxCpTpIdConverService(WxCpTpIdConvertService wxCpTpIdConvertService) {
+    this.wxCpTpIdConvertService = wxCpTpIdConvertService;
+  }
+
+
+  @Override
+  public WxCpTpOAuth2Service getWxCpTpOAuth2Service() {
+    return wxCpTpOAuth2Service;
+  }
+
+  @Override
+  public void setWxCpTpOAuth2Service(WxCpTpOAuth2Service wxCpTpOAuth2Service) {
+    this.wxCpTpOAuth2Service = wxCpTpOAuth2Service;
+  }
+
+  @Override
+  public WxCpTpCustomizedService getWxCpTpCustomizedService() {
+    return wxCpTpCustomizedService;
+  }
+
+  @Override
+  public void setWxCpTpCustomizedService(WxCpTpCustomizedService wxCpTpCustomizedService) {
+    this.wxCpTpCustomizedService = wxCpTpCustomizedService;
+  }
+
+  @Override
+  public WxCpTpConfigStorage getWxCpTpConfigStorage() {
+    return this.configStorage;
+  }
 }

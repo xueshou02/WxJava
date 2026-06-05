@@ -5,12 +5,10 @@ import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import jodd.http.ProxyInfo;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
 import me.chanjar.weixin.common.bean.result.WxMinishopImageUploadResult;
 import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.common.util.http.MediaUploadRequestExecutor;
 import me.chanjar.weixin.common.util.http.MinishopUploadRequestExecutor;
 import me.chanjar.weixin.common.util.http.RequestHttp;
 
@@ -22,11 +20,11 @@ import java.nio.charset.StandardCharsets;
  * .
  *
  * @author ecoolper
- * @date 2017/5/5
+ * created on  2017/5/5
  */
 @Slf4j
 public class JoddHttpMinishopMediaUploadRequestExecutor extends MinishopUploadRequestExecutor<HttpConnectionProvider, ProxyInfo> {
-  public JoddHttpMinishopMediaUploadRequestExecutor(RequestHttp requestHttp) {
+  public JoddHttpMinishopMediaUploadRequestExecutor(RequestHttp<HttpConnectionProvider, ProxyInfo> requestHttp) {
     super(requestHttp);
   }
 
@@ -46,7 +44,7 @@ public class JoddHttpMinishopMediaUploadRequestExecutor extends MinishopUploadRe
     if (error.getErrorCode() != 0) {
       throw new WxErrorException(error);
     }
-    log.info("responseContent: " + responseContent);
+    log.info("responseContent: {}", responseContent);
 
     return WxMinishopImageUploadResult.fromJson(responseContent);
   }

@@ -23,19 +23,10 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WxMaExpressOrderInfoResult implements Serializable {
+public class WxMaExpressOrderInfoResult extends WxMaExpressInfoResult implements Serializable {
 
   private static final long serialVersionUID = -9166603059965942285L;
 
-  /**
-   * 错误码
-   */
-  private Integer errcode;
-
-  /**
-   * 错误信息
-   */
-  private String errmsg;
   /**
    * 订单ID
    */
@@ -60,6 +51,11 @@ public class WxMaExpressOrderInfoResult implements Serializable {
   @SerializedName("waybill_data")
   private List<Map<String,String>> waybillData;
 
+  /**
+   * 运单状态, 0正常，1取消
+   */
+  @SerializedName("order_status")
+  private Integer orderStatus;
 
   public static WxMaExpressOrderInfoResult fromJson(String json) {
     return WxMaGsonBuilder.create().fromJson(json, WxMaExpressOrderInfoResult.class);

@@ -1,20 +1,17 @@
 package com.github.binarywang.wxpay.bean.complaint;
 
 
-import com.github.binarywang.wxpay.bean.media.MarketingImageUploadResult;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
-import me.chanjar.weixin.common.util.json.WxGsonBuilder;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * 微信消费者投诉2.0
  * 投诉通知地址返回的实体
  *
  * @author <a href="https://gitee.com/jeequan/jeepay">jmdhappy</a>
- * @date 2022-3-19
+ * created on  2022-3-19
  */
 @Data
 public class ComplaintNotifyUrlResult implements Serializable {

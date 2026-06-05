@@ -1,23 +1,25 @@
 package com.github.binarywang.wxpay.service.impl;
 
-import com.github.binarywang.wxpay.bean.ecommerce.CombineTransactionsRequest;
-import com.github.binarywang.wxpay.bean.ecommerce.PartnerTransactionsQueryRequest;
-import com.github.binarywang.wxpay.bean.ecommerce.PartnerTransactionsResult;
-import com.github.binarywang.wxpay.bean.ecommerce.ProfitSharingReceiverRequest;
-import com.github.binarywang.wxpay.bean.ecommerce.ProfitSharingReceiverResult;
-import com.github.binarywang.wxpay.bean.ecommerce.SignatureHeader;
-import com.github.binarywang.wxpay.bean.ecommerce.TransactionsResult;
-import com.github.binarywang.wxpay.bean.ecommerce.enums.TradeTypeEnum;
+import com.github.binarywang.wxpay.bean.ecommerce.*;
+import com.github.binarywang.wxpay.bean.ecommerce.enums.SpAccountTypeEnum;
+import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
+import com.github.binarywang.wxpay.bean.request.CombineTransactionsRequest;
+import com.github.binarywang.wxpay.bean.request.WxPayPartnerOrderQueryV3Request;
+import com.github.binarywang.wxpay.bean.result.CombineTransactionsResult;
+import com.github.binarywang.wxpay.bean.result.WxPayPartnerOrderQueryV3Result;
+import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.testbase.ApiTestModule;
-import com.google.gson.GsonBuilder;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.util.RandomUtils;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -44,16 +46,16 @@ public class EcommerceServiceImplTest {
 
     SignatureHeader header = new SignatureHeader();
     header.setNonce(nonce);
-    header.setSerialNo(serialNo);
+    header.setSerial(serialNo);
     header.setTimeStamp(timeStamp);
-    header.setSigned(signed);
+    header.setSignature(signed);
 
     String beforeSign = String.format("%s\n%s\n%s\n",
       header.getTimeStamp(),
       header.getNonce(),
       notifyData);
-    boolean signResult = wxPayService.getConfig().getVerifier().verify(header.getSerialNo(),
-      beforeSign.getBytes(StandardCharsets.UTF_8), header.getSigned());
+    boolean signResult = wxPayService.getConfig().getVerifier().verify(header.getSerial(),
+      beforeSign.getBytes(StandardCharsets.UTF_8), header.getSignature());
     log.info("签名结果:{} \nheader:{} \ndata:{}", signResult, header, notifyData);
   }
 
@@ -99,23 +101,23 @@ public class EcommerceServiceImplTest {
     subOrder2.setAmount(requestAmount);
 
     request.setSubOrders(Arrays.asList(subOrder1, subOrder2));
-    TransactionsResult result = wxPayService.getEcommerceService().combine(TradeTypeEnum.JSAPI, request);
+    CombineTransactionsResult result = wxPayService.getEcommerceService().combine(TradeTypeEnum.JSAPI, request);
 
     System.out.println("result = " + result);
   }
 
   @Test
   public void testQueryPartnerTransactions() throws WxPayException {
-    PartnerTransactionsQueryRequest request = new PartnerTransactionsQueryRequest();
+    WxPayPartnerOrderQueryV3Request request = new WxPayPartnerOrderQueryV3Request();
     //服务商商户号
-    request.setSpMchid("");
+    request.setSpMchId("");
     //二级商户号
-    request.setSubMchid("");
+    request.setSubMchId("");
     //商户订单号
     request.setOutTradeNo("");
     //微信订单号
     request.setTransactionId("");
-    PartnerTransactionsResult result = wxPayService.getEcommerceService().queryPartnerTransactions(request);
+    WxPayPartnerOrderQueryV3Result result = wxPayService.getEcommerceService().queryPartnerOrder(request);
     System.out.println("result = " + result);
   }
 
@@ -123,6 +125,12 @@ public class EcommerceServiceImplTest {
   public void testSubNowBalance() throws WxPayException {
     String subMchid = "";
     wxPayService.getEcommerceService().subNowBalance(subMchid);
+  }
+
+  @Test
+  public void testSubNowBalanceWithAccountType() throws WxPayException {
+    String subMchid = "";
+    wxPayService.getEcommerceService().subNowBalance(subMchid, SpAccountTypeEnum.BASIC);
   }
 
   @Test
@@ -143,5 +151,30 @@ public class EcommerceServiceImplTest {
     String subMchid = "";
     String date = "";
     wxPayService.getEcommerceService().subDayEndBalance(subMchid, date);
+  }
+
+  @Test
+  public void testCreatedAccountCancelApplication() throws WxPayException {
+    AccountCancelApplicationsRequest request = new AccountCancelApplicationsRequest();
+    request.setSubMchid("");
+    request.setOutApplyNo("");
+    request.setApplicationInfo(Lists.newArrayList());
+
+    AccountCancelApplicationsResult result = wxPayService.getEcommerceService().createdAccountCancelApplication(request);
+    log.info("请求参数:{} 响应结果:{}", request, result);
+  }
+
+  @Test
+  public void testGetAccountCancelApplication() throws WxPayException {
+    String request = "申请单号";
+    AccountCancelApplicationsResult result = wxPayService.getEcommerceService().getAccountCancelApplication(request);
+    log.info("请求参数:{} 响应结果:{}", request, result);
+  }
+
+  @Test
+  public void testUploadMediaAccountCancelApplication() throws WxPayException, IOException {
+    AccountCancelApplicationsMediaResult result = wxPayService.getEcommerceService()
+      .uploadMediaAccountCancelApplication(new File("src\\test\\resources\\mm.jpeg"));
+    log.info("响应结果:{}", result);
   }
 }

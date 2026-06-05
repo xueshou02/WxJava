@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * @author keungtung.
- * @date 10/12/2016
+ * created on  10/12/2016
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -21,7 +21,7 @@ public class BaseResp extends AbstractDeviceBean {
   private String errMsg;
 
   @Data
-  private class BaseInfo {
+  private static class BaseInfo {
     @SerializedName("device_type")
     private String deviceType;
 

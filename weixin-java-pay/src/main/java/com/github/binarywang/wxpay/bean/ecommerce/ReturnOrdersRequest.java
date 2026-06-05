@@ -12,7 +12,7 @@ import java.io.Serializable;
  *  * </pre>
  *
  * @author f00lish
- * @date 2020/09/14
+ * created on  2020/09/14
  */
 @Data
 @Builder
@@ -118,4 +118,18 @@ public class ReturnOrdersRequest implements Serializable {
    */
   @SerializedName(value = "description")
   private String description;
+
+  /**
+   * <pre>
+   * 字段名：微信订单号
+   * 变量名：transaction_id
+   * 是否必填：否
+   * 类型：string（32）
+   * 描述：
+   *  微信支付订单号，大于6个月的订单，必填
+   *  示例值：4208450740201411110007820472
+   * </pre>
+   */
+  @SerializedName(value = "transaction_id")
+  private String transactionId;
 }

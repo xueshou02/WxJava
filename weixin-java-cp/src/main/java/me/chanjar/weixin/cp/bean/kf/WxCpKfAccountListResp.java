@@ -1,6 +1,5 @@
 package me.chanjar.weixin.cp.bean.kf;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,8 +12,7 @@ import java.util.List;
 /**
  * 获取客服帐号列表-结果
  *
- * @author Fu
- * @date 2022/1/19 19:13
+ * @author Fu  created on  2022/1/19 19:13
  */
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -29,6 +27,9 @@ public class WxCpKfAccountListResp extends WxCpBaseResp {
   @SerializedName("account_list")
   private List<AccountListDTO> accountList;
 
+  /**
+   * The type Account list dto.
+   */
   @NoArgsConstructor
   @Data
   public static class AccountListDTO {
@@ -49,8 +50,20 @@ public class WxCpKfAccountListResp extends WxCpBaseResp {
      */
     @SerializedName("avatar")
     private String avatar;
+
+    /**
+     * 当前调用接口的应用身份，是否有该客服账号的管理权限（编辑客服账号信息、分配会话和收发消息）。组件应用不返回此字段
+     */
+    @SerializedName("manage_privilege")
+    private Boolean hasManagePrivilege;
   }
 
+  /**
+   * From json wx cp kf account list resp.
+   *
+   * @param json the json
+   * @return the wx cp kf account list resp
+   */
   public static WxCpKfAccountListResp fromJson(String json) {
     return WxCpGsonBuilder.create().fromJson(json, WxCpKfAccountListResp.class);
   }

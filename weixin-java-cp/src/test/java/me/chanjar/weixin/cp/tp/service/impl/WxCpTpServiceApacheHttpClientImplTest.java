@@ -4,7 +4,10 @@ import me.chanjar.weixin.common.bean.WxAccessToken;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.redis.RedissonWxRedisOps;
 import me.chanjar.weixin.cp.bean.WxCpProviderToken;
+import me.chanjar.weixin.cp.bean.WxCpTpCorpId2OpenCorpId;
 import me.chanjar.weixin.cp.config.WxCpTpConfigStorage;
+import me.chanjar.weixin.cp.config.impl.AbstractWxCpTpInRedisConfigImpl;
+import me.chanjar.weixin.cp.config.impl.WxCpTpRedisTemplateConfigImpl;
 import me.chanjar.weixin.cp.config.impl.WxCpTpRedissonConfigImpl;
 import me.chanjar.weixin.cp.tp.service.WxCpTpService;
 import org.apache.commons.lang3.StringUtils;
@@ -23,15 +26,41 @@ import org.testng.annotations.Test;
  */
 public class WxCpTpServiceApacheHttpClientImplTest {
 
+  /**
+   * The constant API_URL.
+   */
   public static final String API_URL = "https://qyapi.weixin.qq.com";
+  /**
+   * The constant SUITE_ID.
+   */
   public static final String SUITE_ID = "xxxxxx";
+  /**
+   * The constant SUITE_SECRET.
+   */
   public static final String SUITE_SECRET = "xxxxxx";
+  /**
+   * The constant TOKEN.
+   */
   public static final String TOKEN = "xxxxxx";
+  /**
+   * The constant AES_KEY.
+   */
   public static final String AES_KEY = "xxxxxx";
+  /**
+   * The constant PROVIDER_CORP_ID.
+   */
   public static final String PROVIDER_CORP_ID = "xxxxxx";
-  public static final String CORP_SECRET = "xxxxxx";
-  public static final String PROVIDER_SECRET = CORP_SECRET;
+  /**
+   * The constant PROVIDER_SECRET.
+   */
+  public static final String PROVIDER_SECRET = "xxxxxx";
+  /**
+   * The constant REDIS_ADDR.
+   */
   public static final String REDIS_ADDR = "redis://xxx.xxx.xxx.xxx:6379";
+  /**
+   * The constant REDIS_PASSWD.
+   */
   public static final String REDIS_PASSWD = "xxxxxx";
 
   private static final String AUTH_CORP_ID = "xxxxxx";
@@ -39,18 +68,37 @@ public class WxCpTpServiceApacheHttpClientImplTest {
 
   private WxCpTpService wxCpTpService;
 
+  /**
+   * Sets up.
+   */
   @BeforeMethod
   public void setUp() {
     wxCpTpService = new WxCpTpServiceApacheHttpClientImpl();
     wxCpTpService.setWxCpTpConfigStorage(wxCpTpConfigStorage());
   }
 
+  /**
+   * Wx cp tp config storage wx cp tp config storage.
+   *
+   * @return the wx cp tp config storage
+   */
   public WxCpTpConfigStorage wxCpTpConfigStorage() {
-    return WxCpTpRedissonConfigImpl.builder().baseApiUrl(API_URL).suiteId(SUITE_ID).suiteSecret(SUITE_SECRET)
-      .token(TOKEN).aesKey(AES_KEY).corpId(PROVIDER_CORP_ID).corpSecret(CORP_SECRET).providerSecret(PROVIDER_SECRET)
-      .wxRedisOps(new RedissonWxRedisOps(redissonClient())).build();
+    WxCpTpRedissonConfigImpl wxCpTpRedissonConfig=new WxCpTpRedissonConfigImpl(redissonClient(),"");
+    wxCpTpRedissonConfig.setBaseApiUrl(API_URL);
+    wxCpTpRedissonConfig.setSuiteId(SUITE_ID);
+    wxCpTpRedissonConfig.setSuiteSecret(SUITE_SECRET);
+    wxCpTpRedissonConfig.setToken(TOKEN);
+    wxCpTpRedissonConfig.setEncodingAESKey(AES_KEY);
+    wxCpTpRedissonConfig.setCorpId(PROVIDER_CORP_ID);
+    wxCpTpRedissonConfig.setProviderSecret(PROVIDER_SECRET);
+    return wxCpTpRedissonConfig;
   }
 
+  /**
+   * Redisson client redisson client.
+   *
+   * @return the redisson client
+   */
   public RedissonClient redissonClient() {
     Config config = new Config();
     config.useSingleServer().setAddress(REDIS_ADDR).setConnectTimeout(10 * 1000).setDatabase(6)
@@ -58,6 +106,11 @@ public class WxCpTpServiceApacheHttpClientImplTest {
     return Redisson.create(config);
   }
 
+  /**
+   * Test get suite access token entity.
+   *
+   * @throws WxErrorException the wx error exception
+   */
   @Test
   public void testGetSuiteAccessTokenEntity() throws WxErrorException {
     wxCpTpService.getWxCpTpConfigStorage().expireSuiteAccessToken();
@@ -71,6 +124,11 @@ public class WxCpTpServiceApacheHttpClientImplTest {
       StringUtils.isNotBlank(suiteAccessTokenEntity.getAccessToken()) && suiteAccessTokenEntity.getExpiresIn() > 0);
   }
 
+  /**
+   * Test get wx cp provider token entity.
+   *
+   * @throws WxErrorException the wx error exception
+   */
   @Test
   public void testGetWxCpProviderTokenEntity() throws WxErrorException {
     wxCpTpService.getWxCpTpConfigStorage().expireProviderToken();
@@ -84,6 +142,11 @@ public class WxCpTpServiceApacheHttpClientImplTest {
       .assertTrue(StringUtils.isNotBlank(providerToken.getProviderAccessToken()) && providerToken.getExpiresIn() > 0);
   }
 
+  /**
+   * Test get corp token.
+   *
+   * @throws WxErrorException the wx error exception
+   */
   @Test
   public void testGetCorpToken() throws WxErrorException {
     wxCpTpService.getWxCpTpConfigStorage().expireAccessToken(AUTH_CORP_ID);
@@ -93,6 +156,11 @@ public class WxCpTpServiceApacheHttpClientImplTest {
     System.out.println("accessToken:" + accessToken);
   }
 
+  /**
+   * Test get auth corp js api ticket.
+   *
+   * @throws WxErrorException the wx error exception
+   */
   @Test
   public void testGetAuthCorpJsApiTicket() throws WxErrorException {
     wxCpTpService.getWxCpTpConfigStorage().expireAuthCorpJsApiTicket(AUTH_CORP_ID);
@@ -102,6 +170,11 @@ public class WxCpTpServiceApacheHttpClientImplTest {
     System.out.println("authCorpJsApiTicket:" + authCorpJsApiTicket);
   }
 
+  /**
+   * Test get suite js api ticket.
+   *
+   * @throws WxErrorException the wx error exception
+   */
   @Test
   public void testGetSuiteJsApiTicket() throws WxErrorException {
     wxCpTpService.getWxCpTpConfigStorage().expireAuthSuiteJsApiTicket(AUTH_CORP_ID);
@@ -109,5 +182,11 @@ public class WxCpTpServiceApacheHttpClientImplTest {
     System.out.println("suiteJsApiTicket:" + suiteJsApiTicket);
     suiteJsApiTicket = wxCpTpService.getSuiteJsApiTicket(AUTH_CORP_ID);
     System.out.println("suiteJsApiTicket:" + suiteJsApiTicket);
+  }
+
+  @Test
+  public void testCorpId2OpenCorpId() throws WxErrorException {
+    WxCpTpCorpId2OpenCorpId openCorpId = wxCpTpService.corpId2OpenCorpId("wpVIkfEAAAu2wGiOEeNMQ69afwLM6BbA");
+    System.out.println("openCorpId:" + openCorpId);
   }
 }

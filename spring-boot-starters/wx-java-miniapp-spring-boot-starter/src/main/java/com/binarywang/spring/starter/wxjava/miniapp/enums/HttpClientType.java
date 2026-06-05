@@ -4,11 +4,11 @@ package com.binarywang.spring.starter.wxjava.miniapp.enums;
  * httpclient类型.
  *
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
- * @date 2020-05-25
+ * created on  2020-05-25
  */
 public enum HttpClientType {
   /**
-   * HttpClient.
+   * HttpClient (Apache HttpClient 4.x).
    */
   HttpClient,
   /**
@@ -19,4 +19,8 @@ public enum HttpClientType {
    * JoddHttp.
    */
   JoddHttp,
+  /**
+   * HttpComponents (Apache HttpClient 5.x).
+   */
+  HttpComponents,
 }

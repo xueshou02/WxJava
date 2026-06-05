@@ -11,6 +11,12 @@ import me.chanjar.weixin.cp.util.json.WxCpGsonBuilder;
 public class WxCpTpTagAddOrRemoveUsersResult extends WxCpTagAddOrRemoveUsersResult {
   private static final long serialVersionUID = 3490401800490702052L;
 
+  /**
+   * Deserialize wx cp tp tag add or remove users result.
+   *
+   * @param json the json
+   * @return the wx cp tp tag add or remove users result
+   */
   public static WxCpTpTagAddOrRemoveUsersResult deserialize(String json) {
     return WxCpGsonBuilder.create().fromJson(json, WxCpTpTagAddOrRemoveUsersResult.class);
   }

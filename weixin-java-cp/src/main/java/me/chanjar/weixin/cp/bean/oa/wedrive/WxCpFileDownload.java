@@ -25,12 +25,14 @@ public class WxCpFileDownload extends WxCpBaseResp implements Serializable {
   @SerializedName("cookie_value")
   private String cookieValue;
 
+  /**
+   * From json wx cp file download.
+   *
+   * @param json the json
+   * @return the wx cp file download
+   */
   public static WxCpFileDownload fromJson(String json) {
     return WxCpGsonBuilder.create().fromJson(json, WxCpFileDownload.class);
-  }
-
-  public String toJson() {
-    return WxCpGsonBuilder.create().toJson(this);
   }
 
 }

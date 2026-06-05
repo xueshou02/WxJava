@@ -10,10 +10,14 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+/**
+ * @author spvycf & F00lish
+ */
 @Slf4j
 public class WxPayValidator implements Validator {
-  private Verifier verifier;
+  private final Verifier verifier;
 
   public WxPayValidator(Verifier verifier) {
     this.verifier = verifier;
@@ -21,7 +25,8 @@ public class WxPayValidator implements Validator {
 
   @Override
   public final boolean validate(CloseableHttpResponse response) throws IOException {
-    if (!ContentType.APPLICATION_JSON.getMimeType().equals(ContentType.parse(String.valueOf(response.getFirstHeader("Content-Type").getValue())).getMimeType())) {
+    if (!ContentType.APPLICATION_JSON.getMimeType().equals(ContentType.parse(String.valueOf(response.getFirstHeader(
+      "Content-Type").getValue())).getMimeType())) {
       return true;
     }
     Header serialNo = response.getFirstHeader("Wechatpay-Serial");
@@ -35,7 +40,7 @@ public class WxPayValidator implements Validator {
     }
 
     String message = buildMessage(response);
-    return verifier.verify(serialNo.getValue(), message.getBytes("utf-8"), sign.getValue());
+    return verifier.verify(serialNo.getValue(), message.getBytes(StandardCharsets.UTF_8), sign.getValue());
   }
 
   protected final String buildMessage(CloseableHttpResponse response) throws IOException {
@@ -44,8 +49,8 @@ public class WxPayValidator implements Validator {
 
     String body = getResponseBody(response);
     return timestamp + "\n"
-          + nonce + "\n"
-          + body + "\n";
+      + nonce + "\n"
+      + body + "\n";
   }
 
   protected final String getResponseBody(CloseableHttpResponse response) throws IOException {

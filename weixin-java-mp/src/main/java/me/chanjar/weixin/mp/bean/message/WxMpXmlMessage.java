@@ -186,9 +186,31 @@ public class WxMpXmlMessage implements Serializable {
   @JacksonXmlCData
   private String unionId;
 
+  @XStreamAlias("ret")
+  @JacksonXmlProperty(localName = "ret")
+  private Integer ret;
+  
+  @XStreamAlias("nickname")
+  @JacksonXmlProperty(localName = "nickname")
+  private String nickname;
+
+  @XStreamAlias("first")
+  @JacksonXmlProperty(localName = "first")
+  private String first;
+  
+  @XStreamAlias("second")
+  @JacksonXmlProperty(localName = "second")
+  private String second;
+
   ///////////////////////////////////////
   // 群发消息返回的结果
   ///////////////////////////////////////
+  /**
+   * 群发的消息ID
+   */
+  @XStreamAlias("MsgID")
+  @JacksonXmlProperty(localName = "MsgID")
+  private Long massMsgId;
   /**
    * 群发的结果.
    */
@@ -564,6 +586,10 @@ public class WxMpXmlMessage implements Serializable {
   ///////////////////////////////////////
   // 微信认证事件推送
   ///////////////////////////////////////
+  // event=wx_verify_pay_succ支付完成
+  // event=wx_verify_dispatch分配审核提供商
+  // event=wx_verify_refill拒绝需重新提交
+  // event=wx_verify_fail拒绝(不可重新提交)
   /**
    * 资质认证成功/名称认证成功: 有效期 (整形)，指的是时间戳，将于该时间戳认证过期.
    * 年审通知: 有效期 (整形)，指的是时间戳，将于该时间戳认证过期，需尽快年审
@@ -584,6 +610,20 @@ public class WxMpXmlMessage implements Serializable {
   @XStreamAlias("FailReason")
   @JacksonXmlProperty(localName = "FailReason")
   private String failReason;
+
+  /**
+   * 重新填写时间戳（秒数）
+   */
+  @XStreamAlias("RefillTime")
+  @JacksonXmlProperty(localName = "RefillTime")
+  private Long refillTime;
+
+  /**
+   * 重新填写原因
+   */
+  @XStreamAlias("RefillReason")
+  @JacksonXmlProperty(localName = "RefillReason")
+  private String refillReason;
 
   ///////////////////////////////////////
   // 微信小店 6.1订单付款通知
@@ -702,6 +742,20 @@ public class WxMpXmlMessage implements Serializable {
   @XStreamAlias("Reason")
   @JacksonXmlProperty(localName = "Reason")
   private String reason;
+
+  /**
+   * 审核延后时的时间（整形），时间戳
+   */
+  @XStreamAlias("DelayTime")
+  @JacksonXmlProperty(localName = "DelayTime")
+  private Long delayTime;
+
+  /**
+   * 审核不通过的截图示例。用 | 分隔的 media_id 的列表
+   */
+  @XStreamAlias("ScreenShot")
+  @JacksonXmlProperty(localName = "ScreenShot")
+  private String screenShot;
 
   ///////////////////////////////////////
   // 扫一扫事件推送
@@ -825,12 +879,33 @@ public class WxMpXmlMessage implements Serializable {
   @JacksonXmlProperty(localName = "nsrsbh")
   private String nsrsbh;
 
+
+  /**
+   * 授权用户资料变更
+   */
+  @XStreamAlias("RevokeInfo")
+  @JacksonXmlProperty(localName = "RevokeInfo")
+  private String revokeInfo;
+
   /**
    * 加密消息
    */
   @XStreamAlias("Encrypt")
   @JacksonXmlProperty(localName = "Encrypt")
   private String encrypt;
+
+  @XStreamAlias("SubscribeMsgPopupEvent")
+  @JacksonXmlProperty(localName = "SubscribeMsgPopupEvent")
+  private WxMpSubscribeMsgEvent.SubscribeMsgPopupEvent subscribeMsgPopupEvent;
+
+  @XStreamAlias("SubscribeMsgChangeEvent")
+  @JacksonXmlProperty(localName = "SubscribeMsgChangeEvent")
+  private WxMpSubscribeMsgEvent.SubscribeMsgChangeEvent subscribeMsgChangeEvent;
+
+  @XStreamAlias("SubscribeMsgSentEvent")
+  @JacksonXmlProperty(localName = "SubscribeMsgSentEvent")
+  private WxMpSubscribeMsgEvent.SubscribeMsgSentEvent subscribeMsgSentEvent;
+
 
   public static WxMpXmlMessage fromXml(String xml) {
     //修改微信变态的消息内容格式，方便解析
@@ -852,6 +927,7 @@ public class WxMpXmlMessage implements Serializable {
    * @param timestamp         时间戳
    * @param nonce             随机串
    * @param msgSignature      签名串
+   * @return 解密后的消息对象
    */
   public static WxMpXmlMessage fromEncryptedXml(String encryptedXml, WxMpConfigStorage wxMpConfigStorage,
                                                 String timestamp, String nonce, String msgSignature) {
@@ -881,14 +957,16 @@ public class WxMpXmlMessage implements Serializable {
   /**
    * <pre>
    * 当接受用户消息时，可能会获得以下值：
-   * {@link WxConsts.XmlMsgType#TEXT}
-   * {@link WxConsts.XmlMsgType#IMAGE}
-   * {@link WxConsts.XmlMsgType#VOICE}
-   * {@link WxConsts.XmlMsgType#VIDEO}
-   * {@link WxConsts.XmlMsgType#LOCATION}
-   * {@link WxConsts.XmlMsgType#LINK}
-   * {@link WxConsts.XmlMsgType#EVENT}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#TEXT}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#IMAGE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#VOICE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#VIDEO}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#LOCATION}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#LINK}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#EVENT}
    * </pre>
+   *
+   * @return 消息类型
    */
   public String getMsgType() {
     return this.msgType;
@@ -897,13 +975,15 @@ public class WxMpXmlMessage implements Serializable {
   /**
    * <pre>
    * 当发送消息的时候使用：
-   * {@link WxConsts.XmlMsgType#TEXT}
-   * {@link WxConsts.XmlMsgType#IMAGE}
-   * {@link WxConsts.XmlMsgType#VOICE}
-   * {@link WxConsts.XmlMsgType#VIDEO}
-   * {@link WxConsts.XmlMsgType#NEWS}
-   * {@link WxConsts.XmlMsgType#MUSIC}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#TEXT}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#IMAGE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#VOICE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#VIDEO}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#NEWS}
+   * {@link me.chanjar.weixin.common.api.WxConsts.XmlMsgType#MUSIC}
    * </pre>
+   *
+   * @param msgType 消息类型
    */
   public void setMsgType(String msgType) {
     this.msgType = msgType;

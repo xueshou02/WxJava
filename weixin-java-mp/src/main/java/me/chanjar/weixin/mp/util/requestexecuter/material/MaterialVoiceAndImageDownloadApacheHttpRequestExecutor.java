@@ -26,7 +26,7 @@ import java.util.Map;
  * Created by ecoolper on 2017/5/5.
  */
 public class MaterialVoiceAndImageDownloadApacheHttpRequestExecutor extends MaterialVoiceAndImageDownloadRequestExecutor<CloseableHttpClient, HttpHost> {
-  public MaterialVoiceAndImageDownloadApacheHttpRequestExecutor(RequestHttp requestHttp, File tmpDirFile) {
+  public MaterialVoiceAndImageDownloadApacheHttpRequestExecutor(RequestHttp<CloseableHttpClient, HttpHost> requestHttp, File tmpDirFile) {
     super(requestHttp, tmpDirFile);
   }
 
@@ -46,7 +46,7 @@ public class MaterialVoiceAndImageDownloadApacheHttpRequestExecutor extends Mate
       // 下载媒体文件出错
       byte[] responseContent = IOUtils.toByteArray(inputStream);
       String responseContentString = new String(responseContent, StandardCharsets.UTF_8);
-      if (responseContentString.length() < 100) {
+      if (responseContentString.length() <= 215) {
         try {
           WxError wxError = WxGsonBuilder.create().fromJson(responseContentString, WxError.class);
           if (wxError.getErrorCode() != 0) {
@@ -57,8 +57,6 @@ public class MaterialVoiceAndImageDownloadApacheHttpRequestExecutor extends Mate
         }
       }
       return new ByteArrayInputStream(responseContent);
-    } finally {
-      httpPost.releaseConnection();
     }
   }
 }

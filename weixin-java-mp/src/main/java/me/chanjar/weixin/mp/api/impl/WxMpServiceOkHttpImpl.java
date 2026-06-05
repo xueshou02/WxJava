@@ -1,18 +1,17 @@
 package me.chanjar.weixin.mp.api.impl;
 
-import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.common.error.WxRuntimeException;
-import me.chanjar.weixin.common.util.http.HttpType;
+import me.chanjar.weixin.common.util.http.HttpClientType;
+import me.chanjar.weixin.common.util.http.okhttp.DefaultOkHttpClientBuilder;
 import me.chanjar.weixin.common.util.http.okhttp.OkHttpProxyInfo;
+import me.chanjar.weixin.mp.bean.WxMpStableAccessTokenRequest;
 import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 import okhttp3.*;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 import static me.chanjar.weixin.mp.enums.WxMpApiUrl.Other.GET_ACCESS_TOKEN_URL;
+import static me.chanjar.weixin.mp.enums.WxMpApiUrl.Other.GET_STABLE_ACCESS_TOKEN_URL;
 
 /**
  * okhttp实现.
@@ -34,40 +33,8 @@ public class WxMpServiceOkHttpImpl extends BaseWxMpServiceImpl<OkHttpClient, OkH
   }
 
   @Override
-  public HttpType getRequestType() {
-    return HttpType.OK_HTTP;
-  }
-
-  @Override
-  public String getAccessToken(boolean forceRefresh) throws WxErrorException {
-    final WxMpConfigStorage config = this.getWxMpConfigStorage();
-    if (!config.isAccessTokenExpired() && !forceRefresh) {
-      return config.getAccessToken();
-    }
-
-    Lock lock = config.getAccessTokenLock();
-    boolean locked = false;
-    try {
-      do {
-        locked = lock.tryLock(100, TimeUnit.MILLISECONDS);
-        if (!forceRefresh && !config.isAccessTokenExpired()) {
-          return config.getAccessToken();
-        }
-      } while (!locked);
-      String url = String.format(GET_ACCESS_TOKEN_URL.getUrl(config), config.getAppId(), config.getSecret());
-
-      Request request = new Request.Builder().url(url).get().build();
-      Response response = getRequestHttpClient().newCall(request).execute();
-      return this.extractAccessToken(Objects.requireNonNull(response.body()).string());
-    } catch (IOException e) {
-      throw new WxRuntimeException(e);
-    } catch (InterruptedException e) {
-      throw new WxRuntimeException(e);
-    } finally {
-      if (locked) {
-        lock.unlock();
-      }
-    }
+  public HttpClientType getRequestType() {
+    return HttpClientType.OK_HTTP;
   }
 
   @Override
@@ -79,24 +46,49 @@ public class WxMpServiceOkHttpImpl extends BaseWxMpServiceImpl<OkHttpClient, OkH
         wxMpConfigStorage.getHttpProxyPort(),
         wxMpConfigStorage.getHttpProxyUsername(),
         wxMpConfigStorage.getHttpProxyPassword());
-    }
-
-    OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-    if (httpProxy != null) {
+      OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
       clientBuilder.proxy(getRequestHttpProxy().getProxy());
 
       //设置授权
-      clientBuilder.authenticator(new Authenticator() {
+      clientBuilder.proxyAuthenticator(new Authenticator() {
         @Override
         public Request authenticate(Route route, Response response) throws IOException {
           String credential = Credentials.basic(httpProxy.getProxyUsername(), httpProxy.getProxyPassword());
           return response.request().newBuilder()
-            .header("Authorization", credential)
+            .header("Proxy-Authorization", credential)
             .build();
         }
       });
+      httpClient = clientBuilder.build();
+    } else {
+      httpClient = DefaultOkHttpClientBuilder.get().build();
     }
-    httpClient = clientBuilder.build();
   }
 
+  @Override
+  protected String doGetAccessTokenRequest() throws IOException {
+    String url = String.format(GET_ACCESS_TOKEN_URL.getUrl(getWxMpConfigStorage()), getWxMpConfigStorage().getAppId(), getWxMpConfigStorage().getSecret());
+
+    Request request = new Request.Builder().url(url).get().build();
+    try (Response response = getRequestHttpClient().newCall(request).execute()) {
+      return Objects.requireNonNull(response.body()).string();
+    }
+  }
+
+  @Override
+  protected String doGetStableAccessTokenRequest(boolean forceRefresh) throws IOException {
+    String url = GET_STABLE_ACCESS_TOKEN_URL.getUrl(getWxMpConfigStorage());
+
+    WxMpStableAccessTokenRequest wxMaAccessTokenRequest = new WxMpStableAccessTokenRequest();
+    wxMaAccessTokenRequest.setAppid(this.getWxMpConfigStorage().getAppId());
+    wxMaAccessTokenRequest.setSecret(this.getWxMpConfigStorage().getSecret());
+    wxMaAccessTokenRequest.setGrantType("client_credential");
+    wxMaAccessTokenRequest.setForceRefresh(forceRefresh);
+
+    RequestBody body = RequestBody.Companion.create(wxMaAccessTokenRequest.toJson(), MediaType.parse("application/json; charset=utf-8"));
+    Request request = new Request.Builder().url(url).post(body).build();
+    try (Response response = getRequestHttpClient().newCall(request).execute()) {
+      return Objects.requireNonNull(response.body()).string();
+    }
+  }
 }

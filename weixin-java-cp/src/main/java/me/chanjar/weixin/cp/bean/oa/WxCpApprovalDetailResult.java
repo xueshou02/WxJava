@@ -24,6 +24,9 @@ public class WxCpApprovalDetailResult implements Serializable {
   @SerializedName("info")
   private WxCpApprovalDetail info;
 
+  /**
+   * The type Wx cp approval detail.
+   */
   @Data
   public static class WxCpApprovalDetail implements Serializable {
     private static final long serialVersionUID = 1353393306564207170L;
@@ -87,6 +90,12 @@ public class WxCpApprovalDetailResult implements Serializable {
      */
     @SerializedName("comments")
     private List<WxCpApprovalComment> comments;
+
+    /**
+     * 审批单据的总金额（单位：分），当审批单包含费用相关控件时返回
+     */
+    @SerializedName("sum_money")
+    private Long sumMoney;
 
   }
 

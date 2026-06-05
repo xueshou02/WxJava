@@ -20,8 +20,11 @@ public class WxCpCheckinDayData implements Serializable {
   @SerializedName("base_info")
   private BaseInfo baseInfo;
 
+  /**
+   * The type Base info.
+   */
   @Data
-  public class BaseInfo implements Serializable {
+  public static class BaseInfo implements Serializable {
 
 
     private static final long serialVersionUID = 3679745559788648438L;
@@ -67,6 +70,9 @@ public class WxCpCheckinDayData implements Serializable {
     @SerializedName("rule_info")
     private RuleInfo ruleInfo;
 
+    /**
+     * The type Rule info.
+     */
     @Data
     public class RuleInfo implements Serializable {
       private static final long serialVersionUID = -5512479811648914189L;
@@ -100,6 +106,9 @@ public class WxCpCheckinDayData implements Serializable {
       @SerializedName("checkintime")
       private List<CheckinTime> checkinTime;
 
+      /**
+       * The type Checkin time.
+       */
       @Data
       public class CheckinTime implements Serializable {
         private static final long serialVersionUID = 1582835435812966332L;
@@ -130,8 +139,11 @@ public class WxCpCheckinDayData implements Serializable {
   @SerializedName("summary_info")
   private SummaryInfo summaryInfo;
 
+  /**
+   * The type Summary info.
+   */
   @Data
-  public class SummaryInfo implements Serializable {
+  public static class SummaryInfo implements Serializable {
     private static final long serialVersionUID = 3428576099259666595L;
     /**
      * checkin_count 当日打卡次数
@@ -170,8 +182,11 @@ public class WxCpCheckinDayData implements Serializable {
   @SerializedName("holiday_infos")
   private List<HolidayInfos> holidayInfos;
 
+  /**
+   * The type Holiday infos.
+   */
   @Data
-  public class HolidayInfos implements Serializable {
+  public static class HolidayInfos implements Serializable {
     private static final long serialVersionUID = -6671577072585561527L;
     /**
      * sp_number 假勤相关信息
@@ -185,6 +200,9 @@ public class WxCpCheckinDayData implements Serializable {
     @SerializedName("sp_title")
     private SpTitle spTitle;
 
+    /**
+     * The type Sp title.
+     */
     @Data
     public class SpTitle implements Serializable {
       private static final long serialVersionUID = 2148815417115384998L;
@@ -194,6 +212,9 @@ public class WxCpCheckinDayData implements Serializable {
       @SerializedName("data")
       private List<Data> data;
 
+      /**
+       * The type Data.
+       */
       @lombok.Data
       public class Data implements Serializable {
         private static final long serialVersionUID = -1672692024530543180L;
@@ -217,6 +238,9 @@ public class WxCpCheckinDayData implements Serializable {
     @SerializedName("sp_description")
     private SpDescription spDescription;
 
+    /**
+     * The type Sp description.
+     */
     @Data
     public class SpDescription implements Serializable {
 
@@ -227,6 +251,9 @@ public class WxCpCheckinDayData implements Serializable {
       @SerializedName("data")
       private List<Data> data;
 
+      /**
+       * The type Data.
+       */
       @lombok.Data
       public class Data implements Serializable {
         private static final long serialVersionUID = 3555479101375365805L;
@@ -251,8 +278,11 @@ public class WxCpCheckinDayData implements Serializable {
   @SerializedName("exception_infos")
   private List<ExceptionInfos> exceptionInfos;
 
+  /**
+   * The type Exception infos.
+   */
   @Data
-  public class ExceptionInfos implements Serializable {
+  public static class ExceptionInfos implements Serializable {
     private static final long serialVersionUID = -5987438373762518299L;
     /**
      * exception 校准状态类型：1-迟到；2-早退；3-缺卡；4-旷工；5-地点异常；6-设备异常
@@ -279,8 +309,11 @@ public class WxCpCheckinDayData implements Serializable {
   @SerializedName("ot_info")
   private OtInfo otInfo;
 
+  /**
+   * The type Ot info.
+   */
   @Data
-  public class OtInfo implements Serializable {
+  public static class OtInfo implements Serializable {
     private static final long serialVersionUID = -6557759801572150175L;
     /**
      * ot_status 状态：0-无加班；1-正常；2-缺时长
@@ -307,8 +340,11 @@ public class WxCpCheckinDayData implements Serializable {
   @SerializedName("sp_items")
   private List<SpItem> spItems;
 
+  /**
+   * The type Sp item.
+   */
   @Data
-  public class SpItem implements Serializable {
+  public static class SpItem implements Serializable {
     private static final long serialVersionUID = 2423158264958352024L;
     /**
      * type 类型：1-请假；2-补卡；3-出差；4-外出；100-外勤

@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 资金账单结果
  *
  * @author f00lish
- * @date 2020/09/28
+ * created on  2020/09/28
  */
 @Data
 @Builder
@@ -48,7 +48,9 @@ public class FundBillResult implements Serializable {
   private FundBill[] downloadBillList;
 
   @Data
-  public static class FundBill {
+  public static class FundBill implements Serializable {
+
+    private static final long serialVersionUID = 4008480977464421822L;
 
     /**
      * <pre>

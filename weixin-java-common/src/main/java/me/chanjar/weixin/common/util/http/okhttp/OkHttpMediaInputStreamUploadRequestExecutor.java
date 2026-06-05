@@ -17,10 +17,10 @@ import java.io.InputStream;
  * 文件输入流上传.
  *
  * @author meiqin.zhou91@gmail.com
- * @date 2022/02/15
+ * created on  2022/02/15
  */
 public class OkHttpMediaInputStreamUploadRequestExecutor extends MediaInputStreamUploadRequestExecutor<OkHttpClient, OkHttpProxyInfo> {
-  public OkHttpMediaInputStreamUploadRequestExecutor(RequestHttp requestHttp) {
+  public OkHttpMediaInputStreamUploadRequestExecutor(RequestHttp<OkHttpClient, OkHttpProxyInfo> requestHttp) {
     super(requestHttp);
   }
 

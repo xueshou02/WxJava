@@ -38,7 +38,7 @@ public interface WxCpService extends WxService {
    *
    * @return the access token
    * @throws WxErrorException the wx error exception
-   * @see #getAccessToken(boolean) #getAccessToken(boolean)#getAccessToken(boolean)
+   * @see #getAccessToken(boolean) #getAccessToken(boolean)#getAccessToken(boolean)#getAccessToken(boolean)
    */
   String getAccessToken() throws WxErrorException;
 
@@ -58,11 +58,37 @@ public interface WxCpService extends WxService {
   String getAccessToken(boolean forceRefresh) throws WxErrorException;
 
   /**
+   * <pre>
+   * 获取通讯录同步access_token，本方法线程安全
+   * 通讯录同步相关接口仅支持通过"通讯录同步secret"调用，需要使用独立的access_token
+   * 详情请见: https://developer.work.weixin.qq.com/document/path/91579
+   * </pre>
+   *
+   * @param forceRefresh 强制刷新
+   * @return 通讯录同步专用的access token
+   * @throws WxErrorException the wx error exception
+   */
+  String getContactAccessToken(boolean forceRefresh) throws WxErrorException;
+
+  /**
+   * <pre>
+   * 获取会话存档access_token，本方法线程安全
+   * 会话存档相关接口需要使用会话存档secret获取单独的access_token
+   * 详情请见: https://developer.work.weixin.qq.com/document/path/91782
+   * </pre>
+   *
+   * @param forceRefresh 强制刷新
+   * @return 会话存档专用的access token
+   * @throws WxErrorException the wx error exception
+   */
+  String getMsgAuditAccessToken(boolean forceRefresh) throws WxErrorException;
+
+  /**
    * 获得jsapi_ticket,不强制刷新jsapi_ticket
    *
    * @return the jsapi ticket
    * @throws WxErrorException the wx error exception
-   * @see #getJsapiTicket(boolean) #getJsapiTicket(boolean)#getJsapiTicket(boolean)
+   * @see #getJsapiTicket(boolean) #getJsapiTicket(boolean)#getJsapiTicket(boolean)#getJsapiTicket(boolean)
    */
   String getJsapiTicket() throws WxErrorException;
 
@@ -89,7 +115,7 @@ public interface WxCpService extends WxService {
    *
    * @return the agent jsapi ticket
    * @throws WxErrorException the wx error exception
-   * @see #getJsapiTicket(boolean) #getJsapiTicket(boolean)#getJsapiTicket(boolean)
+   * @see #getJsapiTicket(boolean) #getJsapiTicket(boolean)#getJsapiTicket(boolean)#getJsapiTicket(boolean)
    */
   String getAgentJsapiTicket() throws WxErrorException;
 
@@ -134,7 +160,7 @@ public interface WxCpService extends WxService {
    *
    * @param url url
    * @return the agent jsapi signature
-   * @throws WxErrorException
+   * @throws WxErrorException the wx error exception
    */
   WxCpAgentJsapiSignature createAgentJsapiSignature(String url) throws WxErrorException;
 
@@ -149,7 +175,7 @@ public interface WxCpService extends WxService {
 
   /**
    * <pre>
-   * 获取微信服务器的ip段
+   * 获取企业微信回调IP段
    * http://qydev.weixin.qq.com/wiki/index.php?title=回调模式#.E8.8E.B7.E5.8F.96.E5.BE.AE.E4.BF.A1.E6.9C.8D.E5.8A.A1.E5.99.A8.E7.9A.84ip.E6.AE.B5
    * </pre>
    *
@@ -157,6 +183,17 @@ public interface WxCpService extends WxService {
    * @throws WxErrorException the wx error exception
    */
   String[] getCallbackIp() throws WxErrorException;
+
+  /**
+   * <pre>
+   * 获取企业微信接口IP段
+   * https://developer.work.weixin.qq.com/document/path/92520
+   * </pre>
+   *
+   * @return 企业微信接口IP段
+   * @throws WxErrorException the wx error exception
+   */
+  String[] getApiDomainIp() throws WxErrorException;
 
   /**
    * <pre>
@@ -182,6 +219,45 @@ public interface WxCpService extends WxService {
    * @throws WxErrorException the wx error exception
    */
   String postWithoutToken(String url, String postData) throws WxErrorException;
+
+  /**
+   * <pre>
+   * 使用会话存档access token发起post请求
+   * 会话存档相关API需要使用会话存档专用的secret获取独立的access token
+   * </pre>
+   *
+   * @param url      接口地址
+   * @param postData 请求body字符串
+   * @return the string
+   * @throws WxErrorException the wx error exception
+   */
+  String postForMsgAudit(String url, String postData) throws WxErrorException;
+
+  /**
+   * <pre>
+   * 使用通讯录同步access token发起get请求
+   * 通讯录同步相关API需要使用通讯录同步专用的secret获取独立的access token
+   * </pre>
+   *
+   * @param url        接口地址
+   * @param queryParam 请求参数
+   * @return the string
+   * @throws WxErrorException the wx error exception
+   */
+  String getForContact(String url, String queryParam) throws WxErrorException;
+
+  /**
+   * <pre>
+   * 使用通讯录同步access token发起post请求
+   * 通讯录同步相关API需要使用通讯录同步专用的secret获取独立的access token
+   * </pre>
+   *
+   * @param url      接口地址
+   * @param postData 请求body字符串
+   * @return the string
+   * @throws WxErrorException the wx error exception
+   */
+  String postForContact(String url, String postData) throws WxErrorException;
 
   /**
    * <pre>
@@ -265,6 +341,7 @@ public interface WxCpService extends WxService {
 
   /**
    * 上传用户列表，增量更新成员
+   *
    * @param mediaId 媒体id
    * @return jobId 异步任务id
    * @throws WxErrorException the wx error exception
@@ -310,9 +387,10 @@ public interface WxCpService extends WxService {
 
   /**
    * 构造扫码登录链接 - 构造独立窗口登录二维码
+   *
    * @param redirectUri 重定向地址，需要进行UrlEncode
-   * @param state 用于保持请求和回调的状态，授权请求后原样带回给企业。该参数可用于防止csrf攻击（跨站请求伪造攻击），建议企业带上该参数，可设置为简单的随机数加session进行校验
-   * @return .
+   * @param state       用于保持请求和回调的状态，授权请求后原样带回给企业。该参数可用于防止csrf攻击（跨站请求伪造攻击），建议企业带上该参数，可设置为简单的随机数加session进行校验
+   * @return . string
    */
   String buildQrConnectUrl(String redirectUri, String state);
 
@@ -401,6 +479,27 @@ public interface WxCpService extends WxService {
   WxCpOaService getOaService();
 
   /**
+   * 获取家校应用复学码相关接口的服务类对象
+   *
+   * @return school service
+   */
+  WxCpSchoolService getSchoolService();
+
+  /**
+   * 获取家校沟通相关接口的服务类对象
+   *
+   * @return school user service
+   */
+  WxCpSchoolUserService getSchoolUserService();
+
+  /**
+   * 获取家校应用健康上报的服务类对象
+   *
+   * @return school health service
+   */
+  WxCpSchoolHealthService getSchoolHealthService();
+
+  /**
    * 获取直播相关接口的服务类对象
    *
    * @return the Living service
@@ -410,21 +509,28 @@ public interface WxCpService extends WxService {
   /**
    * 获取OA 自建应用相关接口的服务类对象
    *
-   * @return
+   * @return oa agent service
    */
   WxCpOaAgentService getOaAgentService();
 
   /**
    * 获取OA效率工具 微盘的服务类对象
    *
-   * @return
+   * @return oa we drive service
    */
   WxCpOaWeDriveService getOaWeDriveService();
 
   /**
+   * 获取OA效率工具 文档的服务类对象
+   *
+   * @return oa we doc service
+   */
+  WxCpOaWeDocService getOaWeDocService();
+
+  /**
    * 获取会话存档相关接口的服务类对象
    *
-   * @return
+   * @return msg audit service
    */
   WxCpMsgAuditService getMsgAuditService();
 
@@ -434,6 +540,13 @@ public interface WxCpService extends WxService {
    * @return the oa calendar service
    */
   WxCpOaCalendarService getOaCalendarService();
+
+  /**
+   * 获取会议室相关接口的服务类对象
+   *
+   * @return the oa meetingroom service
+   */
+  WxCpOaMeetingRoomService getOaMeetingRoomService();
 
   /**
    * 获取日程相关接口的服务类对象
@@ -459,7 +572,7 @@ public interface WxCpService extends WxService {
   /**
    * 获取微信客服服务
    *
-   * @return 微信客服服务
+   * @return 微信客服服务 kf service
    */
   WxCpKfService getKfService();
 
@@ -522,7 +635,7 @@ public interface WxCpService extends WxService {
   /**
    * 获取异步导出服务
    *
-   * @return 异步导出服务
+   * @return 异步导出服务 export service
    */
   WxCpExportService getExportService();
 
@@ -532,4 +645,32 @@ public interface WxCpService extends WxService {
    * @param exportService 异步导出服务
    */
   void setExportService(WxCpExportService exportService);
+
+  /**
+   * 相关接口的服务类对象
+   *
+   * @return the meeting service
+   */
+  WxCpMeetingService getMeetingService();
+
+  /**
+   * 企业互联的服务类对象
+   *
+   * @return 企业互联服务对象
+   */
+  WxCpCorpGroupService getCorpGroupService();
+
+  /**
+   * 获取智能机器人服务
+   *
+   * @return 智能机器人服务 intelligent robot service
+   */
+  WxCpIntelligentRobotService getIntelligentRobotService();
+
+  /**
+   * 获取人事助手服务
+   *
+   * @return 人事助手服务 hr service
+   */
+  WxCpHrService getHrService();
 }

@@ -1,11 +1,14 @@
 package cn.binarywang.wx.miniapp.bean;
 
+import cn.binarywang.wx.miniapp.bean.xpay.WxMaXPayTeamInfo;
+import cn.binarywang.wx.miniapp.constant.WxMaConstants;
 import me.chanjar.weixin.common.api.WxConsts;
 import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -290,5 +293,235 @@ public class WxMaMessageTest {
       .containsEntry("ActionMsg", "揽件阶段-揽件成功")
       .containsEntry("Lat", "0")
       .containsEntry("Lng", "0");
+  }
+
+  /**
+   * 虚拟支付退款推送事件 xpay_refund_notify 测试用例（XML格式，含TeamInfo）
+   */
+  @Test
+  public void testXPayRefundNotifyFromXml() {
+    String xml = "<xml>\n" +
+      "  <ToUserName><![CDATA[gh_abcdefg]]></ToUserName>\n" +
+      "  <FromUserName><![CDATA[oABCDEFG]]></FromUserName>\n" +
+      "  <CreateTime>1700000000</CreateTime>\n" +
+      "  <MsgType><![CDATA[event]]></MsgType>\n" +
+      "  <Event><![CDATA[xpay_refund_notify]]></Event>\n" +
+      "  <OpenId><![CDATA[oABCDEFG]]></OpenId>\n" +
+      "  <WxRefundId><![CDATA[wx_refund_123]]></WxRefundId>\n" +
+      "  <MchRefundId><![CDATA[mch_refund_456]]></MchRefundId>\n" +
+      "  <WxOrderId><![CDATA[wx_order_789]]></WxOrderId>\n" +
+      "  <MchOrderId><![CDATA[mch_order_101]]></MchOrderId>\n" +
+      "  <RefundFee>100</RefundFee>\n" +
+      "  <RetCode>0</RetCode>\n" +
+      "  <RetMsg><![CDATA[success]]></RetMsg>\n" +
+      "  <RefundStartTimestamp>1700000000</RefundStartTimestamp>\n" +
+      "  <RefundSuccTimestamp>1700000010</RefundSuccTimestamp>\n" +
+      "  <WxpayRefundTransactionId><![CDATA[wxpay_refund_tx_202]]></WxpayRefundTransactionId>\n" +
+      "  <RetryTimes>0</RetryTimes>\n" +
+      "  <TeamInfo>\n" +
+      "    <ActivityId><![CDATA[act_001]]></ActivityId>\n" +
+      "    <TeamId><![CDATA[team_002]]></TeamId>\n" +
+      "    <TeamType>1</TeamType>\n" +
+      "    <TeamAction>0</TeamAction>\n" +
+      "  </TeamInfo>\n" +
+      "</xml>";
+
+    WxMaMessage msg = WxMaMessage.fromXml(xml);
+    checkXPayRefundNotifyMessage(msg);
+  }
+
+  /**
+   * 虚拟支付退款推送事件 xpay_refund_notify 测试用例（JSON格式，含TeamInfo）
+   */
+  @Test
+  public void testXPayRefundNotifyFromJson() {
+    String json = "{\n" +
+      "  \"ToUserName\": \"gh_abcdefg\",\n" +
+      "  \"FromUserName\": \"oABCDEFG\",\n" +
+      "  \"CreateTime\": 1700000000,\n" +
+      "  \"MsgType\": \"event\",\n" +
+      "  \"Event\": \"xpay_refund_notify\",\n" +
+      "  \"OpenId\": \"oABCDEFG\",\n" +
+      "  \"WxRefundId\": \"wx_refund_123\",\n" +
+      "  \"MchRefundId\": \"mch_refund_456\",\n" +
+      "  \"WxOrderId\": \"wx_order_789\",\n" +
+      "  \"MchOrderId\": \"mch_order_101\",\n" +
+      "  \"RefundFee\": 100,\n" +
+      "  \"RetCode\": 0,\n" +
+      "  \"RetMsg\": \"success\",\n" +
+      "  \"RefundStartTimestamp\": 1700000000,\n" +
+      "  \"RefundSuccTimestamp\": 1700000010,\n" +
+      "  \"WxpayRefundTransactionId\": \"wxpay_refund_tx_202\",\n" +
+      "  \"RetryTimes\": 0,\n" +
+      "  \"TeamInfo\": {\n" +
+      "    \"ActivityId\": \"act_001\",\n" +
+      "    \"TeamId\": \"team_002\",\n" +
+      "    \"TeamType\": 1,\n" +
+      "    \"TeamAction\": 0\n" +
+      "  }\n" +
+      "}";
+
+    WxMaMessage msg = WxMaMessage.fromJson(json);
+    checkXPayRefundNotifyMessage(msg);
+  }
+
+  private void checkXPayRefundNotifyMessage(WxMaMessage msg) {
+    assertEquals(msg.getToUser(), "gh_abcdefg");
+    assertEquals(msg.getFromUser(), "oABCDEFG");
+    assertEquals(msg.getCreateTime(), new Integer(1700000000));
+    assertEquals(msg.getMsgType(), WxConsts.XmlMsgType.EVENT);
+    assertEquals(msg.getEvent(), "xpay_refund_notify");
+    assertEquals(msg.getWxRefundId(), "wx_refund_123");
+    assertEquals(msg.getMchRefundId(), "mch_refund_456");
+    assertEquals(msg.getWxOrderId(), "wx_order_789");
+    assertEquals(msg.getMchOrderId(), "mch_order_101");
+    assertEquals(msg.getRefundFee(), new Integer(100));
+    assertEquals(msg.getRetCode(), new Integer(0));
+    assertEquals(msg.getRetMsg(), "success");
+    assertEquals(msg.getRefundStartTimestamp(), new Long(1700000000L));
+    assertEquals(msg.getRefundSuccTimestamp(), new Long(1700000010L));
+    assertEquals(msg.getWxpayRefundTransactionId(), "wxpay_refund_tx_202");
+    assertEquals(msg.getRetryTimes(), new Integer(0));
+    WxMaXPayTeamInfo teamInfo = msg.getTeamInfo();
+    assertNotNull(teamInfo);
+    assertEquals(teamInfo.getActivityId(), "act_001");
+    assertEquals(teamInfo.getTeamId(), "team_002");
+    assertEquals(teamInfo.getTeamType(), new Integer(1));
+    assertEquals(teamInfo.getTeamAction(), new Integer(0));
+  }
+
+  /**
+   * 虚拟支付投诉推送事件 xpay_complaint_notify 测试用例（XML格式）
+   */
+  @Test
+  public void testXPayComplaintNotifyFromXml() {
+    String xml = "<xml>\n" +
+      "  <ToUserName><![CDATA[gh_abcdefg]]></ToUserName>\n" +
+      "  <FromUserName><![CDATA[official_openid]]></FromUserName>\n" +
+      "  <CreateTime>1700000100</CreateTime>\n" +
+      "  <MsgType><![CDATA[event]]></MsgType>\n" +
+      "  <Event><![CDATA[xpay_complaint_notify]]></Event>\n" +
+      "  <OpenId><![CDATA[user_openid_abc]]></OpenId>\n" +
+      "  <WxOrderId><![CDATA[wx_order_cmp_001]]></WxOrderId>\n" +
+      "  <MchOrderId><![CDATA[mch_order_cmp_002]]></MchOrderId>\n" +
+      "  <TransactionId><![CDATA[transaction_cmp_003]]></TransactionId>\n" +
+      "  <ComplaintId><![CDATA[complaint_004]]></ComplaintId>\n" +
+      "  <ComplaintDetail><![CDATA[商品未收到]]></ComplaintDetail>\n" +
+      "  <ComplaintTime>1700000050</ComplaintTime>\n" +
+      "  <RetryTimes>0</RetryTimes>\n" +
+      "  <RequestId><![CDATA[req_005]]></RequestId>\n" +
+      "</xml>";
+
+    WxMaMessage msg = WxMaMessage.fromXml(xml);
+    checkXPayComplaintNotifyMessage(msg);
+  }
+
+  /**
+   * 虚拟支付投诉推送事件 xpay_complaint_notify 测试用例（JSON格式）
+   */
+  @Test
+  public void testXPayComplaintNotifyFromJson() {
+    String json = "{\n" +
+      "  \"ToUserName\": \"gh_abcdefg\",\n" +
+      "  \"FromUserName\": \"official_openid\",\n" +
+      "  \"CreateTime\": 1700000100,\n" +
+      "  \"MsgType\": \"event\",\n" +
+      "  \"Event\": \"xpay_complaint_notify\",\n" +
+      "  \"OpenId\": \"user_openid_abc\",\n" +
+      "  \"WxOrderId\": \"wx_order_cmp_001\",\n" +
+      "  \"MchOrderId\": \"mch_order_cmp_002\",\n" +
+      "  \"TransactionId\": \"transaction_cmp_003\",\n" +
+      "  \"ComplaintId\": \"complaint_004\",\n" +
+      "  \"ComplaintDetail\": \"商品未收到\",\n" +
+      "  \"ComplaintTime\": 1700000050,\n" +
+      "  \"RetryTimes\": 0,\n" +
+      "  \"RequestId\": \"req_005\"\n" +
+      "}";
+
+    WxMaMessage msg = WxMaMessage.fromJson(json);
+    checkXPayComplaintNotifyMessage(msg);
+  }
+
+  private void checkXPayComplaintNotifyMessage(WxMaMessage msg) {
+    assertEquals(msg.getToUser(), "gh_abcdefg");
+    assertEquals(msg.getFromUser(), "official_openid");
+    assertEquals(msg.getCreateTime(), new Integer(1700000100));
+    assertEquals(msg.getMsgType(), WxConsts.XmlMsgType.EVENT);
+    assertEquals(msg.getEvent(), "xpay_complaint_notify");
+    assertEquals(msg.getOpenId(), "user_openid_abc");
+    assertEquals(msg.getWxOrderId(), "wx_order_cmp_001");
+    assertEquals(msg.getMchOrderId(), "mch_order_cmp_002");
+    assertEquals(msg.getComplaintTransactionId(), "transaction_cmp_003");
+    assertEquals(msg.getComplaintId(), "complaint_004");
+    assertEquals(msg.getComplaintDetail(), "商品未收到");
+    assertEquals(msg.getComplaintTime(), new Long(1700000050L));
+    assertEquals(msg.getRetryTimes(), new Integer(0));
+    assertEquals(msg.getRequestId(), "req_005");
+  }
+
+  /**
+   * 虚拟支付 iOS 退款查询通知事件 xpay_subscribe_ios_refund_query_notify 测试用例（XML格式）
+   */
+  @Test
+  public void testXPaySubscribeIosRefundQueryNotifyFromXml() {
+    String xml = "<xml>\n" +
+      "  <ToUserName><![CDATA[gh_abcdefg]]></ToUserName>\n" +
+      "  <FromUserName><![CDATA[oABCDEFG]]></FromUserName>\n" +
+      "  <CreateTime>1700001000</CreateTime>\n" +
+      "  <MsgType><![CDATA[event]]></MsgType>\n" +
+      "  <Event><![CDATA[xpay_subscribe_ios_refund_query_notify]]></Event>\n" +
+      "  <refund_time><![CDATA[1700000900]]></refund_time>\n" +
+      "  <order_time><![CDATA[1699990000]]></order_time>\n" +
+      "  <channel_bill><![CDATA[apple_bill_001]]></channel_bill>\n" +
+      "  <bundleid><![CDATA[com.example.app]]></bundleid>\n" +
+      "  <product_id><![CDATA[product_xyz]]></product_id>\n" +
+      "  <p_count><![CDATA[1]]></p_count>\n" +
+      "  <refund_request_reason><![CDATA[不喜欢]]></refund_request_reason>\n" +
+      "  <provide_status><![CDATA[1]]></provide_status>\n" +
+      "</xml>";
+
+    WxMaMessage msg = WxMaMessage.fromXml(xml);
+    checkXPaySubscribeIosRefundQueryNotifyMessage(msg);
+  }
+
+  /**
+   * 虚拟支付 iOS 退款查询通知事件 xpay_subscribe_ios_refund_query_notify 测试用例（JSON格式）
+   */
+  @Test
+  public void testXPaySubscribeIosRefundQueryNotifyFromJson() {
+    String json = "{\n" +
+      "  \"ToUserName\": \"gh_abcdefg\",\n" +
+      "  \"FromUserName\": \"oABCDEFG\",\n" +
+      "  \"CreateTime\": 1700001000,\n" +
+      "  \"MsgType\": \"event\",\n" +
+      "  \"Event\": \"xpay_subscribe_ios_refund_query_notify\",\n" +
+      "  \"refund_time\": \"1700000900\",\n" +
+      "  \"order_time\": \"1699990000\",\n" +
+      "  \"channel_bill\": \"apple_bill_001\",\n" +
+      "  \"bundleid\": \"com.example.app\",\n" +
+      "  \"product_id\": \"product_xyz\",\n" +
+      "  \"p_count\": \"1\",\n" +
+      "  \"refund_request_reason\": \"不喜欢\",\n" +
+      "  \"provide_status\": \"1\"\n" +
+      "}";
+
+    WxMaMessage msg = WxMaMessage.fromJson(json);
+    checkXPaySubscribeIosRefundQueryNotifyMessage(msg);
+  }
+
+  private void checkXPaySubscribeIosRefundQueryNotifyMessage(WxMaMessage msg) {
+    assertEquals(msg.getToUser(), "gh_abcdefg");
+    assertEquals(msg.getFromUser(), "oABCDEFG");
+    assertEquals(msg.getCreateTime(), new Integer(1700001000));
+    assertEquals(msg.getMsgType(), WxConsts.XmlMsgType.EVENT);
+    assertEquals(msg.getEvent(), WxMaConstants.XPayNotifyEvent.IOS_REFUND_QUERY);
+    assertEquals(msg.getRefundTime(), "1700000900");
+    assertEquals(msg.getOrderTime(), "1699990000");
+    assertEquals(msg.getChannelBill(), "apple_bill_001");
+    assertEquals(msg.getBundleid(), "com.example.app");
+    assertEquals(msg.getXpayProductId(), "product_xyz");
+    assertEquals(msg.getPCount(), "1");
+    assertEquals(msg.getRefundRequestReason(), "不喜欢");
+    assertEquals(msg.getProvideStatus(), "1");
   }
 }

@@ -1,20 +1,31 @@
 package me.chanjar.weixin.cp.util.xml;
 
+import com.thoughtworks.xstream.XStream;
+import me.chanjar.weixin.common.util.xml.XStreamInitializer;
+import me.chanjar.weixin.cp.bean.WxCpTpXmlPackage;
+import me.chanjar.weixin.cp.bean.message.*;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.thoughtworks.xstream.XStream;
-import me.chanjar.weixin.common.util.xml.XStreamInitializer;
-import me.chanjar.weixin.cp.bean.message.*;
-import me.chanjar.weixin.cp.bean.WxCpTpXmlPackage;
-
+/**
+ * The type X stream transformer.
+ */
 public class XStreamTransformer {
 
-  protected static final Map<Class, XStream> CLASS_2_XSTREAM_INSTANCE = configXStreamInstance();
+  /**
+   * The constant CLASS_2_XSTREAM_INSTANCE.
+   */
+  protected static final Map<Class<?>, XStream> CLASS_2_XSTREAM_INSTANCE = configXStreamInstance();
 
   /**
-   * xml -> pojo
+   * {@code xml -> pojo}
+   *
+   * @param <T>   the type parameter
+   * @param clazz the clazz
+   * @param xml   the xml
+   * @return the t
    */
   @SuppressWarnings("unchecked")
   public static <T> T fromXml(Class<T> clazz, String xml) {
@@ -22,6 +33,14 @@ public class XStreamTransformer {
     return object;
   }
 
+  /**
+   * From xml t.
+   *
+   * @param <T>   the type parameter
+   * @param clazz the clazz
+   * @param is    the is
+   * @return the t
+   */
   @SuppressWarnings("unchecked")
   public static <T> T fromXml(Class<T> clazz, InputStream is) {
     T object = (T) CLASS_2_XSTREAM_INSTANCE.get(clazz).fromXML(is);
@@ -34,19 +53,24 @@ public class XStreamTransformer {
    * @param clz     类型
    * @param xStream xml解析器
    */
-  public static void register(Class clz, XStream xStream) {
+  public static void register(Class<?> clz, XStream xStream) {
     CLASS_2_XSTREAM_INSTANCE.put(clz, xStream);
   }
 
   /**
-   * pojo -> xml.
+   * {@code pojo -> xml.}
+   *
+   * @param <T>    the type parameter
+   * @param clazz  the clazz
+   * @param object the object
+   * @return the string
    */
   public static <T> String toXml(Class<T> clazz, T object) {
     return CLASS_2_XSTREAM_INSTANCE.get(clazz).toXML(object);
   }
 
-  private static Map<Class, XStream> configXStreamInstance() {
-    Map<Class, XStream> map = new HashMap<>();
+  private static Map<Class<?>, XStream> configXStreamInstance() {
+    Map<Class<?>, XStream> map = new HashMap<>();
     map.put(WxCpXmlMessage.class, configWxCpXmlMessage());
     map.put(WxCpXmlOutNewsMessage.class, configWxCpXmlOutNewsMessage());
     map.put(WxCpXmlOutTextMessage.class, configWxCpXmlOutTextMessage());
@@ -69,6 +93,11 @@ public class XStreamTransformer {
     xstream.processAnnotations(WxCpXmlMessage.SendPicsInfo.class);
     xstream.processAnnotations(WxCpXmlMessage.SendPicsInfo.Item.class);
     xstream.processAnnotations(WxCpXmlMessage.SendLocationInfo.class);
+    xstream.processAnnotations(WxCpXmlMessage.SelectedItem.class);
+    // 显式允许 String 类
+    xstream.allowTypes(new Class[]{String.class});
+    // 模板卡片事件推送独属
+    xstream.alias("OptionId",String.class);
     return xstream;
   }
 
@@ -121,6 +150,7 @@ public class XStreamTransformer {
     xstream.processAnnotations(WxCpXmlOutTaskCardMessage.class);
     return xstream;
   }
+
   private static XStream configWxCpXmlOutUpdateBtnMessage() {
     XStream xstream = XStreamInitializer.getInstance();
     xstream.processAnnotations(WxCpXmlOutMessage.class);

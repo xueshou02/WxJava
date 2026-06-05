@@ -18,11 +18,11 @@ import java.io.IOException;
  * .
  *
  * @author ecoolper
- * @date 2017/5/5
+ * created on  2017/5/5
  */
 @Slf4j
 public class MaterialNewsInfoOkhttpRequestExecutor extends MaterialNewsInfoRequestExecutor<OkHttpClient, OkHttpProxyInfo> {
-  public MaterialNewsInfoOkhttpRequestExecutor(RequestHttp requestHttp) {
+  public MaterialNewsInfoOkhttpRequestExecutor(RequestHttp<OkHttpClient, OkHttpProxyInfo> requestHttp) {
     super(requestHttp);
   }
 

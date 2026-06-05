@@ -25,6 +25,9 @@ public class WxCpContactWayInfo implements Serializable {
   @SerializedName("contact_way")
   private ContactWay contactWay;
 
+  /**
+   * The type Contact way.
+   */
   @Getter
   @Setter
   public static class ContactWay implements Serializable {
@@ -149,6 +152,13 @@ public class WxCpContactWayInfo implements Serializable {
     @SerializedName("unionid")
     private String unionId;
 
+
+    /**
+     *非必填,是否开启同一外部企业客户只能添加同一个员工，默认为否，开启后，同一个企业的客户会优先添加到同一个跟进人
+     */
+    @SerializedName("is_exclusive")
+    private boolean isExclusive;
+
     /**
      * <pre>
      * 非必填
@@ -157,10 +167,21 @@ public class WxCpContactWayInfo implements Serializable {
      */
     private Conclusion conclusions;
 
+    /**
+     * From json wx cp contact way info . contact way.
+     *
+     * @param json the json
+     * @return the wx cp contact way info . contact way
+     */
     public static WxCpContactWayInfo.ContactWay fromJson(String json) {
       return WxCpGsonBuilder.create().fromJson(json, WxCpContactWayInfo.ContactWay.class);
     }
 
+    /**
+     * To json string.
+     *
+     * @return the string
+     */
     public String toJson() {
       return WxCpGsonBuilder.create().toJson(this);
     }
@@ -189,14 +210,28 @@ public class WxCpContactWayInfo implements Serializable {
   }
 
 
+  /**
+   * From json wx cp contact way info.
+   *
+   * @param json the json
+   * @return the wx cp contact way info
+   */
   public static WxCpContactWayInfo fromJson(String json) {
     return WxCpGsonBuilder.create().fromJson(json, WxCpContactWayInfo.class);
   }
 
+  /**
+   * To json string.
+   *
+   * @return the string
+   */
   public String toJson() {
     return WxCpGsonBuilder.create().toJson(this);
   }
 
+  /**
+   * The enum Type.
+   */
   public enum TYPE {
     /**
      * 单人
@@ -212,6 +247,9 @@ public class WxCpContactWayInfo implements Serializable {
 
   }
 
+  /**
+   * The enum Scene.
+   */
   public enum SCENE {
 
     /**

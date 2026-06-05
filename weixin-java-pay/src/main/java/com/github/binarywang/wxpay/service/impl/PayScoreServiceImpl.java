@@ -1,12 +1,13 @@
 package com.github.binarywang.wxpay.service.impl;
 
-import com.github.binarywang.wxpay.bean.ecommerce.SignatureHeader;
+import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.payscore.PayScoreNotifyData;
 import com.github.binarywang.wxpay.bean.payscore.UserAuthorizationStatusNotifyResult;
 import com.github.binarywang.wxpay.bean.payscore.WxPayScoreRequest;
 import com.github.binarywang.wxpay.bean.payscore.WxPayScoreResult;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.exception.WxPayException;
+import com.github.binarywang.wxpay.exception.WxSignTestException;
 import com.github.binarywang.wxpay.service.PayScoreService;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.v3.util.AesUtils;
@@ -28,7 +29,7 @@ import java.util.Objects;
 
 /**
  * @author doger.wang
- * @date 2020/5/14 9:43
+ * created on  2020/5/14 9:43
  */
 @RequiredArgsConstructor
 public class PayScoreServiceImpl implements PayScoreService {
@@ -229,7 +230,7 @@ public class PayScoreServiceImpl implements PayScoreService {
     if(Strings.isNullOrEmpty(request.getAppid())){
       request.setAppid(config.getAppId());
     }
-    if(Strings.isNullOrEmpty(config.getServiceId())){
+    if(Strings.isNullOrEmpty(request.getServiceId())){
       request.setServiceId(config.getServiceId());
     }
     request.setOutOrderNo(null);
@@ -300,7 +301,7 @@ public class PayScoreServiceImpl implements PayScoreService {
 
   @Override
   public PayScoreNotifyData parseNotifyData(String data, SignatureHeader header) throws WxPayException {
-    if (Objects.nonNull(header) && !this.verifyNotifySign(header, data)) {
+    if (Objects.nonNull(header) && !payService.verifyNotifySign(header, data)) {
       throw new WxPayException("非法请求，头部信息验证失败");
     }
     return GSON.fromJson(data, PayScoreNotifyData.class);
@@ -320,16 +321,4 @@ public class PayScoreServiceImpl implements PayScoreService {
     }
   }
 
-  /**
-   * 校验通知签名
-   *
-   * @param header 通知头信息
-   * @param data   通知数据
-   * @return true:校验通过 false:校验不通过
-   */
-  private boolean verifyNotifySign(SignatureHeader header, String data) {
-    String beforeSign = String.format("%s\n%s\n%s\n", header.getTimeStamp(), header.getNonce(), data);
-    return payService.getConfig().getVerifier().verify(header.getSerialNo(),
-      beforeSign.getBytes(StandardCharsets.UTF_8), header.getSigned());
-  }
 }

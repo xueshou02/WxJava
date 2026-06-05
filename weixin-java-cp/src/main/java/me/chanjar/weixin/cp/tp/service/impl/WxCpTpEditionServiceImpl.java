@@ -12,8 +12,7 @@ import static me.chanjar.weixin.cp.constant.WxCpApiPathConsts.Tp.PROLONG_TRY;
 /**
  * 应用版本付费版本相关接口实现
  *
- * @author leigouqing
- * @date 2022年4月24日
+ * @author leigouqing  created on  2022年4月24日
  */
 @RequiredArgsConstructor
 public class WxCpTpEditionServiceImpl implements WxCpTpEditionService {
@@ -27,7 +26,7 @@ public class WxCpTpEditionServiceImpl implements WxCpTpEditionService {
    * 延长试用期
    * <p>
    * <a href='https://developer.work.weixin.qq.com/document/path/91913'>文档地址</a>
-   * <p/>
+   * </p>
    * <ul>
    *     <li>一个应用可以多次延长试用，但是试用总天数不能超过60天</li>
    *     <li>仅限时试用或试用过期状态下的应用可以延长试用期</li>

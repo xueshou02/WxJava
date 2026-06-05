@@ -15,6 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class WxCpUserGsonAdapterTest {
 
+  /**
+   * Test deserialize.
+   */
   @Test
   public void testDeserialize() {
     final String userJson = "{\n" +
@@ -29,7 +32,8 @@ public class WxCpUserGsonAdapterTest {
       "    \"gender\": \"1\",\n" +
       "    \"email\": \"zhangsan@gzdev.com\",\n" +
       "    \"isleader\": 1,\n" +
-      "    \"avatar\": \"http://wx.qlogo.cn/mmopen/ajNVdqHZLLA3WJ6DSZUfiakYe37PKnQhBIeOQBO4czqrnZDS79FH5Wm5m4X69TBicnHFlhiafvDwklOpZeXYQQ2icg/0\",\n" +
+      "    \"avatar\": \"http://wx.qlogo" +
+      ".cn/mmopen/ajNVdqHZLLA3WJ6DSZUfiakYe37PKnQhBIeOQBO4czqrnZDS79FH5Wm5m4X69TBicnHFlhiafvDwklOpZeXYQQ2icg/0\",\n" +
       "    \"telephone\": \"020-123456\",\n" +
       "    \"address\": \"广州市海珠区新港中路\"," +
       "    \"enable\": 1,\n" +
@@ -136,6 +140,9 @@ public class WxCpUserGsonAdapterTest {
 
   }
 
+  /**
+   * Test serialize.
+   */
   @Test
   public void testSerialize() {
     WxCpUser user = new WxCpUser();
@@ -172,5 +179,32 @@ public class WxCpUserGsonAdapterTest {
       "{\"type\":1,\"name\":\"网页名称\",\"web\":{\"url\":\"http://www.test.com\",\"title\":\"标题\"}}," +
       "{\"type\":2,\"name\":\"测试app\"," +
       "\"miniprogram\":{\"appid\":\"wx8bd80126147df384\",\"pagepath\":\"/index\",\"title\":\"my miniprogram\"}}]}}");
+  }
+
+  /**
+   * Test directLeader empty array serialization.
+   * This test verifies that empty directLeader arrays are included in JSON as "direct_leader":[]
+   * instead of being omitted, which is required for WeChat Work API to reset user direct leaders.
+   */
+  @Test
+  public void testDirectLeaderEmptyArraySerialization() {
+    WxCpUser user = new WxCpUser();
+    user.setUserId("testuser");
+    user.setName("Test User");
+    
+    // Test with empty array - should be serialized as "direct_leader":[]
+    user.setDirectLeader(new String[]{});
+    String json = user.toJson();
+    assertThat(json).contains("\"direct_leader\":[]");
+    
+    // Test with null - should not include direct_leader field
+    user.setDirectLeader(null);
+    json = user.toJson();
+    assertThat(json).doesNotContain("direct_leader");
+    
+    // Test with non-empty array - should be serialized normally
+    user.setDirectLeader(new String[]{"leader1", "leader2"});
+    json = user.toJson();
+    assertThat(json).contains("\"direct_leader\":[\"leader1\",\"leader2\"]");
   }
 }

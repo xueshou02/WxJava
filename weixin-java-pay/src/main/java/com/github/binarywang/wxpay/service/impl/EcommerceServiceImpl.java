@@ -3,33 +3,47 @@ package com.github.binarywang.wxpay.service.impl;
 import com.github.binarywang.wxpay.bean.ecommerce.*;
 import com.github.binarywang.wxpay.bean.ecommerce.enums.FundBillTypeEnum;
 import com.github.binarywang.wxpay.bean.ecommerce.enums.SpAccountTypeEnum;
-import com.github.binarywang.wxpay.bean.ecommerce.enums.TradeTypeEnum;
+import com.github.binarywang.wxpay.bean.notify.CombineNotifyResult;
+import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
+import com.github.binarywang.wxpay.bean.notify.WxPayPartnerNotifyV3Result;
+import com.github.binarywang.wxpay.bean.request.*;
+import com.github.binarywang.wxpay.bean.result.CombineQueryResult;
+import com.github.binarywang.wxpay.bean.result.CombineTransactionsResult;
+import com.github.binarywang.wxpay.bean.result.WxPayPartnerOrderQueryV3Result;
+import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
+import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.EcommerceService;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.github.binarywang.wxpay.v3.WechatPayUploadHttpPost;
 import com.github.binarywang.wxpay.v3.util.AesUtils;
 import com.github.binarywang.wxpay.v3.util.RsaCryptoUtil;
 import com.google.common.base.CaseFormat;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.commons.lang3.StringUtils;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.beanutils.BeanMap;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class EcommerceServiceImpl implements EcommerceService {
 
   private static final Gson GSON = new GsonBuilder().create();
+
   private final WxPayService payService;
 
   @Override
@@ -56,104 +70,53 @@ public class EcommerceServiceImpl implements EcommerceService {
   }
 
   @Override
-  public TransactionsResult combine(TradeTypeEnum tradeType, CombineTransactionsRequest request) throws WxPayException {
-    String url = this.payService.getPayBaseUrl() + tradeType.getCombineUrl();
-    String response = this.payService.postV3(url, GSON.toJson(request));
-    return GSON.fromJson(response, TransactionsResult.class);
+  public CombineTransactionsResult combine(TradeTypeEnum tradeType, CombineTransactionsRequest request) throws WxPayException {
+    return this.payService.combine(tradeType, request);
   }
 
   @Override
   public <T> T combineTransactions(TradeTypeEnum tradeType, CombineTransactionsRequest request) throws WxPayException {
-    TransactionsResult result = this.combine(tradeType, request);
-    return result.getPayInfo(tradeType, request.getCombineAppid(),
-      request.getCombineMchid(), payService.getConfig().getPrivateKey());
+    return this.payService.combineTransactions(tradeType, request);
   }
 
   @Override
-  public CombineTransactionsNotifyResult parseCombineNotifyResult(String notifyData, SignatureHeader header) throws WxPayException {
-    if(Objects.nonNull(header) && !this.verifyNotifySign(header, notifyData)){
-      throw new WxPayException("非法请求，头部信息验证失败");
-    }
-    NotifyResponse response = GSON.fromJson(notifyData, NotifyResponse.class);
-    NotifyResponse.Resource resource = response.getResource();
-    String cipherText = resource.getCiphertext();
-    String associatedData = resource.getAssociatedData();
-    String nonce = resource.getNonce();
-    String apiV3Key = this.payService.getConfig().getApiV3Key();
-    try {
-      String result = AesUtils.decryptToString(associatedData, nonce,cipherText, apiV3Key);
-      CombineTransactionsResult transactionsResult = GSON.fromJson(result, CombineTransactionsResult.class);
-
-      CombineTransactionsNotifyResult notifyResult = new CombineTransactionsNotifyResult();
-      notifyResult.setRawData(response);
-      notifyResult.setResult(transactionsResult);
-      return notifyResult;
-    } catch (GeneralSecurityException | IOException e) {
-      throw new WxPayException("解析报文异常！", e);
-    }
+  public CombineNotifyResult parseCombineNotifyResult(String notifyData, SignatureHeader header) throws WxPayException {
+    return this.payService.parseCombineNotifyResult(notifyData, header);
   }
 
   @Override
-  public CombineTransactionsResult queryCombineTransactions(String outTradeNo) throws WxPayException {
-    String url = String.format("%s/v3/combine-transactions/out-trade-no/%s", this.payService.getPayBaseUrl(), outTradeNo);
-    String response = this.payService.getV3(url);
-    return GSON.fromJson(response, CombineTransactionsResult.class);
+  public CombineQueryResult queryCombine(String combineOutTradeNo) throws WxPayException {
+    return this.payService.queryCombine(combineOutTradeNo);
   }
 
   @Override
-  public TransactionsResult partner(TradeTypeEnum tradeType, PartnerTransactionsRequest request) throws WxPayException {
-    String url = this.payService.getPayBaseUrl() + tradeType.getPartnerUrl();
-    String response = this.payService.postV3(url, GSON.toJson(request));
-    return GSON.fromJson(response, TransactionsResult.class);
+  public void closeCombine(CombineCloseRequest request) throws WxPayException {
+    this.payService.closeCombine(request);
   }
 
   @Override
-  public <T> T partnerTransactions(TradeTypeEnum tradeType, PartnerTransactionsRequest request) throws WxPayException {
-    TransactionsResult result = this.partner(tradeType, request);
-    String appId = request.getSubAppid() != null ? request.getSubAppid() : request.getSpAppid();
-    return result.getPayInfo(tradeType, appId,
-      request.getSpMchid(), payService.getConfig().getPrivateKey());
+  public WxPayUnifiedOrderV3Result unifiedPartnerOrder(TradeTypeEnum tradeType, WxPayPartnerUnifiedOrderV3Request request) throws WxPayException {
+    return this.payService.unifiedPartnerOrderV3(tradeType, request);
   }
 
   @Override
-  public PartnerTransactionsNotifyResult parsePartnerNotifyResult(String notifyData, SignatureHeader header) throws WxPayException {
-    if(Objects.nonNull(header) && !this.verifyNotifySign(header, notifyData)){
-      throw new WxPayException("非法请求，头部信息验证失败");
-    }
-    NotifyResponse response = GSON.fromJson(notifyData, NotifyResponse.class);
-    NotifyResponse.Resource resource = response.getResource();
-    String cipherText = resource.getCiphertext();
-    String associatedData = resource.getAssociatedData();
-    String nonce = resource.getNonce();
-    String apiV3Key = this.payService.getConfig().getApiV3Key();
-    try {
-      String result = AesUtils.decryptToString(associatedData, nonce,cipherText, apiV3Key);
-      PartnerTransactionsResult transactionsResult = GSON.fromJson(result, PartnerTransactionsResult.class);
-
-      PartnerTransactionsNotifyResult notifyResult = new PartnerTransactionsNotifyResult();
-      notifyResult.setRawData(response);
-      notifyResult.setResult(transactionsResult);
-      return notifyResult;
-    } catch (GeneralSecurityException | IOException e) {
-      throw new WxPayException("解析报文异常！", e);
-    }
+  public <T> T createPartnerOrder(TradeTypeEnum tradeType, WxPayPartnerUnifiedOrderV3Request request) throws WxPayException {
+    return this.payService.createPartnerOrderV3(tradeType, request);
   }
 
   @Override
-  public PartnerTransactionsResult queryPartnerTransactions(PartnerTransactionsQueryRequest request) throws WxPayException {
-    String url = String.format("%s/v3/pay/partner/transactions/out-trade-no/%s", this.payService.getPayBaseUrl(), request.getOutTradeNo());
-    if (Objects.isNull(request.getOutTradeNo())) {
-      url = String.format("%s/v3/pay/partner/transactions/id/%s", this.payService.getPayBaseUrl(), request.getTransactionId());
-    }
-    String query = String.format("?sp_mchid=%s&sub_mchid=%s", request.getSpMchid(), request.getSubMchid());
-    String response = this.payService.getV3(url + query);
-    return GSON.fromJson(response, PartnerTransactionsResult.class);
+  public WxPayPartnerNotifyV3Result parsePartnerNotifyResult(String notifyData, SignatureHeader header) throws WxPayException {
+    return this.payService.parsePartnerOrderNotifyV3Result(notifyData, header);
   }
 
   @Override
-  public String closePartnerTransactions(PartnerTransactionsCloseRequest request) throws WxPayException {
-    String url = String.format("%s/v3/pay/partner/transactions/out-trade-no/%s/close", this.payService.getPayBaseUrl(), request.getOutTradeNo());
-    return this.payService.postV3(url, GSON.toJson(request));
+  public WxPayPartnerOrderQueryV3Result queryPartnerOrder(WxPayPartnerOrderQueryV3Request request) throws WxPayException {
+    return this.payService.queryPartnerOrderV3(request);
+  }
+
+  @Override
+  public void closePartnerOrder(WxPayPartnerOrderCloseV3Request request) throws WxPayException {
+    this.payService.closePartnerOrderV3(request);
   }
 
   @Override
@@ -173,6 +136,16 @@ public class EcommerceServiceImpl implements EcommerceService {
   @Override
   public FundBalanceResult subNowBalance(String subMchid) throws WxPayException {
     String url = String.format("%s/v3/ecommerce/fund/balance/%s", this.payService.getPayBaseUrl(), subMchid);
+    String response = this.payService.getV3(url);
+    return GSON.fromJson(response, FundBalanceResult.class);
+  }
+
+  @Override
+  public FundBalanceResult subNowBalance(String subMchid, SpAccountTypeEnum accountType) throws WxPayException {
+    String url = String.format("%s/v3/ecommerce/fund/balance/%s", this.payService.getPayBaseUrl(), subMchid);
+    if (Objects.nonNull(accountType)) {
+      url += "?account_type=" + accountType.getValue();
+    }
     String response = this.payService.getV3(url);
     return GSON.fromJson(response, FundBalanceResult.class);
   }
@@ -268,6 +241,25 @@ public class EcommerceServiceImpl implements EcommerceService {
     return GSON.fromJson(response, RefundQueryResult.class);
   }
 
+
+  @Override
+  public ReturnAdvanceResult refundsReturnAdvance(String subMchid, String refundId) throws WxPayException {
+    String url = String.format("%s/v3/ecommerce/refunds/%s/return-advance", this.payService.getPayBaseUrl(), refundId);
+    Map<String, String> request = new HashMap<>();
+    request.put("sub_mchid",subMchid);
+    String response = this.payService.postV3(url, GSON.toJson(request));
+    return GSON.fromJson(response, ReturnAdvanceResult.class);
+  }
+
+
+  @Override
+  public ReturnAdvanceResult queryRefundsReturnAdvance(String subMchid, String refundId) throws WxPayException {
+    String url = String.format("%s/v3/ecommerce/refunds/%s/return-advance?sub_mchid=%s", this.payService.getPayBaseUrl(), refundId,subMchid);
+    String response = this.payService.getV3(url);
+    return GSON.fromJson(response, ReturnAdvanceResult.class);
+  }
+
+
   @Override
   public RefundQueryResult queryRefundByOutRefundNo(String subMchid, String outRefundNo) throws WxPayException {
     String url = String.format("%s/v3/ecommerce/refunds/out-refund-no/%s?sub_mchid=%s", this.payService.getPayBaseUrl(), outRefundNo, subMchid);
@@ -277,7 +269,7 @@ public class EcommerceServiceImpl implements EcommerceService {
 
   @Override
   public RefundNotifyResult parseRefundNotifyResult(String notifyData, SignatureHeader header) throws WxPayException {
-    if(Objects.nonNull(header) && !this.verifyNotifySign(header, notifyData)){
+    if (Objects.nonNull(header) && !payService.verifyNotifySign(header, notifyData)) {
       throw new WxPayException("非法请求，头部信息验证失败");
     }
     NotifyResponse response = GSON.fromJson(notifyData, NotifyResponse.class);
@@ -287,8 +279,29 @@ public class EcommerceServiceImpl implements EcommerceService {
     String nonce = resource.getNonce();
     String apiV3Key = this.payService.getConfig().getApiV3Key();
     try {
-      String result = AesUtils.decryptToString(associatedData, nonce,cipherText, apiV3Key);
+      String result = AesUtils.decryptToString(associatedData, nonce, cipherText, apiV3Key);
       RefundNotifyResult notifyResult = GSON.fromJson(result, RefundNotifyResult.class);
+      notifyResult.setRawData(response);
+      return notifyResult;
+    } catch (GeneralSecurityException | IOException e) {
+      throw new WxPayException("解析报文异常！", e);
+    }
+  }
+
+  @Override
+  public WithdrawNotifyResult parseWithdrawNotifyResult(String notifyData, SignatureHeader header) throws WxPayException {
+    if (Objects.nonNull(header) && !payService.verifyNotifySign(header, notifyData)) {
+      throw new WxPayException("非法请求，头部信息验证失败");
+    }
+    NotifyResponse response = GSON.fromJson(notifyData, NotifyResponse.class);
+    NotifyResponse.Resource resource = response.getResource();
+    String cipherText = resource.getCiphertext();
+    String associatedData = resource.getAssociatedData();
+    String nonce = resource.getNonce();
+    String apiV3Key = this.payService.getConfig().getApiV3Key();
+    try {
+      String result = AesUtils.decryptToString(associatedData, nonce, cipherText, apiV3Key);
+      WithdrawNotifyResult notifyResult = GSON.fromJson(result, WithdrawNotifyResult.class);
       notifyResult.setRawData(response);
       return notifyResult;
     } catch (GeneralSecurityException | IOException e) {
@@ -325,6 +338,27 @@ public class EcommerceServiceImpl implements EcommerceService {
   }
 
   @Override
+  public SpWithdrawStatusResult querySpWithdrawByWithdrawId(String withdrawId) throws WxPayException {
+    String url = String.format("%s/v3/merchant/fund/withdraw/withdraw-id/%s", this.payService.getPayBaseUrl(), withdrawId);
+    String response = this.payService.getV3(url);
+    return GSON.fromJson(response, SpWithdrawStatusResult.class);
+  }
+
+  @Override
+  public SubDayEndBalanceWithdrawResult subDayEndBalanceWithdraw(SubDayEndBalanceWithdrawRequest request) throws WxPayException {
+    String url = String.format("%s/v3/ecommerce/fund/balance-withdraw", this.payService.getPayBaseUrl());
+    String response = this.payService.postV3(url, GSON.toJson(request));
+    return GSON.fromJson(response, SubDayEndBalanceWithdrawResult.class);
+  }
+
+  @Override
+  public SubDayEndBalanceWithdrawStatusResult querySubDayEndBalanceWithdraw(String subMchid, String outRequestNo) throws WxPayException {
+    String url = String.format("%s/v3/ecommerce/fund/balance-withdraw/out-request-no/%s?sub_mchid=%s", this.payService.getPayBaseUrl(), outRequestNo, subMchid);
+    String response = this.payService.getV3(url);
+    return GSON.fromJson(response, SubDayEndBalanceWithdrawStatusResult.class);
+  }
+
+  @Override
   public void modifySettlement(String subMchid, SettlementRequest request) throws WxPayException {
     String url = String.format("%s/v3/apply4sub/sub_merchants/%s/modify-settlement", this.payService.getPayBaseUrl(), subMchid);
     RsaCryptoUtil.encryptFields(request, this.payService.getConfig().getVerifier().getValidCertificate());
@@ -357,34 +391,71 @@ public class EcommerceServiceImpl implements EcommerceService {
     return this.payService.downloadV3(url);
   }
 
-  /**
-   * 校验通知签名
-   * @param header 通知头信息
-   * @param data 通知数据
-   * @return true:校验通过 false:校验不通过
-   */
-  private boolean verifyNotifySign(SignatureHeader header, String data) {
-    String beforeSign = String.format("%s\n%s\n%s\n",
-      header.getTimeStamp(),
-      header.getNonce(),
-      data);
-    return payService.getConfig().getVerifier().verify(header.getSerialNo(),
-      beforeSign.getBytes(StandardCharsets.UTF_8), header.getSigned());
+  @Override
+  public SubsidiesCreateResult subsidiesCreate(SubsidiesCreateRequest subsidiesCreateRequest) throws WxPayException{
+    String url = String.format("%s/v3/ecommerce/subsidies/create", this.payService.getPayBaseUrl());
+    String response = this.payService.postV3(url, GSON.toJson(subsidiesCreateRequest));
+    return GSON.fromJson(response, SubsidiesCreateResult.class);
+  }
+
+  @Override
+  public  SubsidiesReturnResult subsidiesReturn(SubsidiesReturnRequest subsidiesReturnRequest) throws WxPayException{
+    String url = String.format("%s/v3/ecommerce/subsidies/return", this.payService.getPayBaseUrl());
+    String response = this.payService.postV3(url, GSON.toJson(subsidiesReturnRequest));
+    return GSON.fromJson(response, SubsidiesReturnResult.class);
+  }
+
+
+  @Override
+  public SubsidiesCancelResult subsidiesCancel(SubsidiesCancelRequest subsidiesCancelRequest) throws WxPayException{
+    String url = String.format("%s/v3/ecommerce/subsidies/cancel", this.payService.getPayBaseUrl());
+    String response = this.payService.postV3(url, GSON.toJson(subsidiesCancelRequest));
+    return GSON.fromJson(response, SubsidiesCancelResult.class);
+  }
+
+  @Override
+  public AccountCancelApplicationsResult createdAccountCancelApplication(AccountCancelApplicationsRequest accountCancelApplicationsRequest) throws WxPayException {
+    String url = String.format("%s/v3/ecommerce/account/cancel-applications", this.payService.getPayBaseUrl());
+    String response = this.payService.postV3(url, GSON.toJson(accountCancelApplicationsRequest));
+    return GSON.fromJson(response, AccountCancelApplicationsResult.class);
+  }
+
+  @Override
+  public AccountCancelApplicationsResult getAccountCancelApplication(String outApplyNo) throws WxPayException {
+    String url = String.format("%s/v3/ecommerce/account/cancel-applications/out-apply-no/%s", this.payService.getPayBaseUrl(), outApplyNo);
+    String result = this.payService.getV3(url);
+    return GSON.fromJson(result, AccountCancelApplicationsResult.class);
+  }
+
+  @Override
+  public AccountCancelApplicationsMediaResult uploadMediaAccountCancelApplication(File imageFile) throws WxPayException, IOException {
+    String url = String.format("%s/v3/ecommerce/account/cancel-applications/media", this.payService.getPayBaseUrl());
+    try (FileInputStream s1 = new FileInputStream(imageFile)) {
+      String sha256 = DigestUtils.sha256Hex(s1);
+      try (InputStream s2 = new FileInputStream(imageFile)) {
+        WechatPayUploadHttpPost request = new WechatPayUploadHttpPost.Builder(URI.create(url))
+          .withImage(imageFile.getName(), sha256, s2)
+          .buildEcommerceAccount();
+        String result = this.payService.postV3(url, request);
+        return GSON.fromJson(result, AccountCancelApplicationsMediaResult.class);
+      }
+    }
   }
 
   /**
    * 对象拼接到url
+   *
    * @param o 转换对象
-   * @return  拼接好的string
+   * @return 拼接好的string
    */
   private String parseURLPair(Object o) {
-    Map<Object, Object> map = new BeanMap(o);
+    Map<Object, Object> map = getObjectToMap(o);
     Set<Map.Entry<Object, Object>> set = map.entrySet();
     Iterator<Map.Entry<Object, Object>> it = set.iterator();
     StringBuilder sb = new StringBuilder();
     while (it.hasNext()) {
       Map.Entry<Object, Object> e = it.next();
-      if ( !"class".equals(e.getKey()) && e.getValue() != null) {
+      if (!"class".equals(e.getKey()) && e.getValue() != null) {
         sb.append(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, String.valueOf(e.getKey())))
           .append("=").append(e.getValue()).append("&");
       }
@@ -392,5 +463,27 @@ public class EcommerceServiceImpl implements EcommerceService {
     return sb.deleteCharAt(sb.length() - 1).toString();
   }
 
-
+  public static Map<Object, Object> getObjectToMap(Object obj) {
+    try {
+      Map<Object, Object> result = new LinkedHashMap<>();
+      final Class<?> beanClass = obj.getClass();
+      final BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
+      final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+      if (propertyDescriptors != null) {
+        for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+          if (propertyDescriptor != null) {
+            final String name = propertyDescriptor.getName();
+            final Method readMethod = propertyDescriptor.getReadMethod();
+            if (readMethod != null) {
+              result.put(name, readMethod.invoke(obj));
+            }
+          }
+        }
+      }
+      return result;
+    } catch (IllegalAccessException | IntrospectionException | InvocationTargetException ignored) {
+      return null;
+    }
   }
+
+}

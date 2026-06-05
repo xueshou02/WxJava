@@ -3,6 +3,7 @@ package com.github.binarywang.wxpay.service.impl;
 import com.github.binarywang.wxpay.bean.marketing.payroll.*;
 import com.github.binarywang.wxpay.bean.marketing.transfer.PartnerTransferRequest;
 import com.github.binarywang.wxpay.bean.marketing.transfer.PartnerTransferResult;
+import com.github.binarywang.wxpay.bean.result.WxPayApplyBillV3Result;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.testbase.ApiTestModule;
@@ -13,11 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
+
 /**
  * 微工卡（服务商）
  *
  * @author xiaoqiang
- * @date 2021/12/9
+ * created on  2021/12/9
  */
 @Slf4j
 @Test
@@ -111,6 +114,7 @@ public class PayrollServiceImplTest {
     request.setIdCardNumber("7FzH5XksJG3a8HLLsaaUV6K54y1OnPMY5");
     request.setProjectName("某项目");
     request.setUserName("LP7bT4hQXUsOZCEvK2YrSiqFsnP0oRMfeoLN0vBg");
+    request.setAuthenticateType("NORMAL_AUTHENTICATE");
     PreOrderWithAuthResult preOrderWithAuthResult = wxPayService.getPayrollService().payrollCardPreOrderWithAuth(request);
     log.info(preOrderWithAuthResult.toString());
 
@@ -120,9 +124,37 @@ public class PayrollServiceImplTest {
   public void merchantFundWithdrawBillType() throws WxPayException {
     String billType = "NO_SUCC";
     String billDate = "2019-08-17";
-    PreOrderWithAuthResult preOrderWithAuthResult = wxPayService.getPayrollService().merchantFundWithdrawBillType(billType, billDate);
-    log.info(preOrderWithAuthResult.toString());
+    WxPayApplyBillV3Result result = wxPayService.getPayrollService().merchantFundWithdrawBillType(billType, billDate, null);
+    log.info(result.toString());
+  }
 
+  @Test
+  public void payrollCardTransferBatches() throws WxPayException {
+    PayrollTransferBatchesRequest request = PayrollTransferBatchesRequest.builder()
+      .appid("wxa1111111")
+      .subMchid("1111111")
+      .subAppid("wxa1111111")
+      .outBatchNo("plfk2020042013" + System.currentTimeMillis())
+      .batchName("2019年1月深圳分部报销单")
+      .batchRemark("2019年1月深圳分部报销单")
+      .totalAmount(200000L)
+      .totalNum(1)
+      .employmentType("LONG_TERM_EMPLOYMENT")
+      .employmentScene("LOGISTICS")
+      .authorizationType("INFORMATION_AUTHORIZATION_TYPE")
+      .transferDetailList(Collections.singletonList(
+        PayrollTransferBatchesRequest.TransferDetail.builder()
+          .outDetailNo("x23zy545Bd5436" + System.currentTimeMillis())
+          .transferAmount(200000L)
+          .transferRemark("2020年4月报销")
+          .openid("o-MYE42l80oelYMDE34nYD456Xoy")
+          .userName("张三")
+          .userIdCard("8609cb22e1774a50a930e414cc71eca06121bcd266335cda230d24a7886a8d9f")
+          .build()
+      ))
+      .build();
+    PayrollTransferBatchesResult result = wxPayService.getPayrollService().payrollCardTransferBatches(request);
+    log.info(result.toString());
   }
 
 }

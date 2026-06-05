@@ -9,6 +9,7 @@ import me.chanjar.weixin.cp.tp.service.WxCpTpOrderService;
 import org.apache.commons.lang3.time.DateUtils;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -18,8 +19,8 @@ import java.util.Objects;
 
 import static me.chanjar.weixin.cp.constant.WxCpApiPathConsts.Tp.GET_ORDER;
 import static me.chanjar.weixin.cp.constant.WxCpApiPathConsts.Tp.GET_ORDER_LIST;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
@@ -35,9 +36,14 @@ public class WxCpTpOrderServiceImplTest {
 
   private WxCpTpOrderService wxCpTpOrderService;
 
+  private AutoCloseable mockitoAnnotations;
+
+  /**
+   * Sets up.
+   */
   @BeforeClass
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    mockitoAnnotations = MockitoAnnotations.openMocks(this);
     configStorage = new WxCpTpDefaultConfigImpl();
     when(wxCpTpService.getWxCpTpConfigStorage()).thenReturn(configStorage);
     wxCpTpOrderService = new WxCpTpOrderServiceImpl(wxCpTpService);
@@ -45,7 +51,20 @@ public class WxCpTpOrderServiceImplTest {
 
 
   /**
+   * Tear down.
+   *
+   * @throws Exception the exception
+   */
+  @AfterClass
+  public void tearDown() throws Exception {
+    mockitoAnnotations.close();
+  }
+
+
+  /**
    * 获取订单详情
+   *
+   * @throws WxErrorException the wx error exception
    */
   @Test
   public void testGetOrder() throws WxErrorException {
@@ -95,6 +114,8 @@ public class WxCpTpOrderServiceImplTest {
 
   /**
    * 获取订单列表
+   *
+   * @throws WxErrorException the wx error exception
    */
   @Test
   public void testGetOrderList() throws WxErrorException {

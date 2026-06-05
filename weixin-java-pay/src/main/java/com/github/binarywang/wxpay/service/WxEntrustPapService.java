@@ -11,7 +11,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
  *  </pre>
  *
  * @author chenliang
- * @date 2021 -08-02 4:50 下午
+ * created on  2021 -08-02 4:50 下午
  */
 public interface WxEntrustPapService {
 
@@ -87,6 +87,24 @@ public interface WxEntrustPapService {
   WxWithholdResult withhold(WxWithholdRequest wxWithholdRequest) throws WxPayException;
 
   /**
+   * 服务商模式的申请扣款
+   * <pre>
+   *   申请扣款
+   *   详见：<a href="https://pay.weixin.qq.com/wiki/doc/api/wxpay_v2/papay/chapter5_8.shtml">https://pay.weixin.qq.com/wiki/doc/api/wxpay_v2/papay/chapter5_8.shtml</a>
+   *   请求微信发起委托扣款，扣款额度和次数由使用的签约模板限制，
+   *   该扣款接口是立即扣款 无延时 扣款前无消息通知。
+   *
+   *   • 特殊情况：周期扣费为通知后24小时扣费方式情况下，如果用户为首次签约（包含解约后重新签约），
+   *   从用户签约成功时间开始算，商户在12小时内发起的扣款，会被立即执行，无延迟。商户超过12小时以后发起的扣款，都按24小时扣费规则执行
+   * </pre>
+   *
+   * @param wxWithholdRequest the wx withhold request
+   * @return wx withhold result
+   * @throws WxPayException the wx pay exception
+   */
+  WxPayCommonResult withholdPartner(WxWithholdRequest wxWithholdRequest) throws WxPayException;
+
+  /**
    * 预扣费通知
    * <pre>
    *   预扣费接口
@@ -148,4 +166,22 @@ public interface WxEntrustPapService {
    * @throws WxPayException the wx pay exception
    */
   WxWithholdOrderQueryResult papOrderQuery(WxWithholdOrderQueryRequest wxWithholdOrderQueryRequest) throws WxPayException;
+
+  /**
+   * <pre>
+   *   签约、解约结果通知解析
+   *   详见：<a href="https://pay.weixin.qq.com/doc/v2/merchant/4011987586">签约、解约结果通知</a>
+   *   注意：
+   *    1、同样的通知可能会多次发送给商户系统。商户系统必须能够正确处理重复的通知。 推荐的做法是：当商户系统收到通知进行处理时，先检查对应业务数据的状态，并判断该通知是否已经处理。如果未处理，则再进行处理；如果已处理，则直接返回结果成功。在对业务数据进行状态检查和处理之前，要采用数据锁进行并发控制，以避免函数重入造成的数据混乱。
+   *    2、如果在所有通知频率(0/10/10/10/30/30/30/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300/300（单位：秒）)后没有收到微信侧回调,商户应调用查询订单接口确认订单状态。
+   *   特别提醒：
+   *    1、商户系统对于签约、解约结果通知的内容一定要做签名验证,并校验返回的商户协议号和用户openid信息是否一致，防止数据泄露导致出现“假通知”，造成损失。
+   *    2、当收到通知进行处理时，首先检查对应业务数据的状态，判断该通知是否已经处理过，如果没有处理过再进行处理，如果处理过直接返回结果成功。在对业务数据进行状态检查和处理之前，要采用数据锁进行并发控制，以避免函数重入造成的数据混乱。
+   * </pre>
+   *
+   * @param xmlData the wx withhold order query request
+   * @return wx sign result
+   * @throws WxPayException the wx pay exception
+   */
+  WxSignQueryResult parseSignNotifyResult(String xmlData) throws WxPayException;
 }

@@ -97,6 +97,42 @@ public class WxCpTpUserServiceImpl implements WxCpTpUserService {
   }
 
   @Override
+  public List<WxCpUser> listSimpleByDepartment(Long departId, Boolean fetchChild, Integer status, String corpId)
+    throws WxErrorException {
+    StringBuilder params = new StringBuilder();
+    if (fetchChild != null) {
+      params.append("fetch_child=").append(fetchChild ? "1" : "0");
+    }
+    if (status != null) {
+      if (params.length() > 0) {
+        params.append('&');
+      }
+      params.append("status=").append(status);
+    } else {
+      if (params.length() > 0) {
+        params.append('&');
+      }
+      params.append("status=0");
+    }
+    if (params.length() > 0) {
+      params.append('&');
+    }
+    params.append("access_token=")
+      .append(mainService.getWxCpTpConfigStorage().getAccessToken(corpId));
+
+    String url = mainService.getWxCpTpConfigStorage().getApiUrl(USER_SIMPLE_LIST + departId);
+    String responseContent = this.mainService.get(url, params.toString(), true);
+    JsonObject tmpJsonElement = GsonParser.parse(responseContent);
+    return WxCpGsonBuilder.create()
+      .fromJson(
+        tmpJsonElement.getAsJsonObject().get("userlist"),
+        new TypeToken<List<WxCpUser>>() {
+        }.getType()
+      );
+  }
+
+  @Override
+  @Deprecated
   public List<WxCpUser> listSimpleByDepartment(Long departId, Boolean fetchChild, Integer status)
     throws WxErrorException {
     String params = "";
@@ -186,10 +222,11 @@ public class WxCpTpUserServiceImpl implements WxCpTpUserService {
   }
 
   @Override
-  public String getUserId(String mobile) throws WxErrorException {
+  public String getUserId(String mobile, String corpId) throws WxErrorException {
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("mobile", mobile);
-    String url = mainService.getWxCpTpConfigStorage().getApiUrl(GET_USER_ID);
+    String url = mainService.getWxCpTpConfigStorage().getApiUrl(GET_USER_ID)
+    + "?access_token=" + mainService.getWxCpTpConfigStorage().getAccessToken(corpId);
     String responseContent = this.mainService.post(url, jsonObject.toString());
     JsonObject tmpJsonElement = GsonParser.parse(responseContent);
     return tmpJsonElement.getAsJsonObject().get("userid").getAsString();

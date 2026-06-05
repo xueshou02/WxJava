@@ -1,12 +1,17 @@
 package me.chanjar.weixin.open.util.json;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.chanjar.weixin.common.util.http.apache.ApacheHttpClientBuilder;
 import me.chanjar.weixin.open.bean.WxOpenAuthorizerAccessToken;
 import me.chanjar.weixin.open.bean.WxOpenComponentAccessToken;
 import me.chanjar.weixin.open.bean.auth.WxOpenAuthorizationInfo;
 import me.chanjar.weixin.open.bean.auth.WxOpenAuthorizerInfo;
 import me.chanjar.weixin.open.bean.result.*;
+
+import java.io.File;
 import java.util.Objects;
 
 /**
@@ -26,8 +31,19 @@ public class WxOpenGsonBuilder {
     INSTANCE.registerTypeAdapter(WxOpenQueryAuthResult.class, new WxOpenQueryAuthResultGsonAdapter());
     INSTANCE.registerTypeAdapter(WxOpenAuthorizerInfoResult.class, new WxOpenAuthorizerInfoResultGsonAdapter());
     INSTANCE.registerTypeAdapter(WxOpenAuthorizerOptionResult.class, new WxOpenAuthorizerOptionResultGsonAdapter());
-    INSTANCE.registerTypeAdapter(WxFastMaAccountBasicInfoResult.class, new WxFastMaAccountBasicInfoGsonAdapter());
     INSTANCE.registerTypeAdapter(WxOpenAuthorizerListResult.class, new WxOpenAuthorizerListResultGsonAdapter());
+
+    INSTANCE.setExclusionStrategies(new ExclusionStrategy() {
+      @Override
+      public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+        return false;
+      }
+
+      @Override
+      public boolean shouldSkipClass(Class<?> aClass) {
+        return aClass == File.class || aClass == ApacheHttpClientBuilder.class;
+      }
+    });
   }
 
   public static Gson create() {

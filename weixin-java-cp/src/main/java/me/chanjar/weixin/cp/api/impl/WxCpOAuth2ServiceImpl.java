@@ -10,7 +10,10 @@ import me.chanjar.weixin.cp.api.WxCpOAuth2Service;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpOauth2UserInfo;
 import me.chanjar.weixin.cp.bean.WxCpUserDetail;
+import me.chanjar.weixin.cp.bean.workbench.WxCpSecondVerificationInfo;
 import me.chanjar.weixin.cp.util.json.WxCpGsonBuilder;
+
+import java.util.Optional;
 
 import static me.chanjar.weixin.common.api.WxConsts.OAuth2Scope.*;
 import static me.chanjar.weixin.cp.constant.WxCpApiPathConsts.OAuth2.*;
@@ -67,16 +70,34 @@ public class WxCpOAuth2ServiceImpl implements WxCpOAuth2Service {
 
   @Override
   public WxCpOauth2UserInfo getUserInfo(Integer agentId, String code) throws WxErrorException {
-    String responseText = this.mainService.get(String.format(this.mainService.getWxCpConfigStorage().getApiUrl(GET_USER_INFO), code, agentId), null);
+    String responseText =
+      this.mainService.get(String.format(this.mainService.getWxCpConfigStorage().getApiUrl(GET_USER_INFO), code,
+        agentId), null);
     JsonObject jo = GsonParser.parse(responseText);
 
     return WxCpOauth2UserInfo.builder()
-      .userId(GsonHelper.getString(jo, "UserId"))
+      .userId(Optional.ofNullable(GsonHelper.getString(jo, "UserId")).orElse(GsonHelper.getString(jo, "userid")))
       .deviceId(GsonHelper.getString(jo, "DeviceId"))
-      .openId(GsonHelper.getString(jo, "OpenId"))
+      .openId(Optional.ofNullable(GsonHelper.getString(jo, "OpenId")).orElse(GsonHelper.getString(jo, "openid")))
       .userTicket(GsonHelper.getString(jo, "user_ticket"))
       .expiresIn(GsonHelper.getString(jo, "expires_in"))
       .externalUserId(GsonHelper.getString(jo, "external_userid"))
+      .parentUserId(GsonHelper.getString(jo, "parent_userid"))
+      .studentUserId(GsonHelper.getString(jo, "student_userid"))
+      .build();
+  }
+
+  @Override
+  public WxCpOauth2UserInfo getSchoolUserInfo(String code) throws WxErrorException {
+    String responseText =
+      this.mainService.get(String.format(this.mainService.getWxCpConfigStorage().getApiUrl(GET_SCHOOL_USER_INFO),
+        code), null);
+    JsonObject jo = GsonParser.parse(responseText);
+
+    return WxCpOauth2UserInfo.builder()
+      .deviceId(GsonHelper.getString(jo, "DeviceId"))
+      .parentUserId(GsonHelper.getString(jo, "parent_userid"))
+      .studentUserId(GsonHelper.getString(jo, "student_userid"))
       .build();
   }
 
@@ -84,7 +105,29 @@ public class WxCpOAuth2ServiceImpl implements WxCpOAuth2Service {
   public WxCpUserDetail getUserDetail(String userTicket) throws WxErrorException {
     JsonObject param = new JsonObject();
     param.addProperty("user_ticket", userTicket);
-    String responseText = this.mainService.post(this.mainService.getWxCpConfigStorage().getApiUrl(GET_USER_DETAIL), param.toString());
+    String responseText = this.mainService.post(this.mainService.getWxCpConfigStorage().getApiUrl(GET_USER_DETAIL),
+      param.toString());
     return WxCpGsonBuilder.create().fromJson(responseText, WxCpUserDetail.class);
+  }
+
+  @Override
+  public WxCpOauth2UserInfo getAuthUserInfo(String code) throws WxErrorException {
+    String responseText =
+      this.mainService.get(String.format(this.mainService.getWxCpConfigStorage().getApiUrl(GET_USER_AUTH_INFO), code), null);
+    JsonObject jo = GsonParser.parse(responseText);
+
+    return WxCpOauth2UserInfo.builder()
+      .userId(GsonHelper.getString(jo, "userid"))
+      .openId(GsonHelper.getString(jo, "openid"))
+      .userTicket(GsonHelper.getString(jo, "user_ticket"))
+      .externalUserId(GsonHelper.getString(jo, "external_userid"))
+      .build();
+  }
+
+  @Override
+  public WxCpSecondVerificationInfo getTfaInfo(String code) throws WxErrorException {
+    String responseText = this.mainService.post(this.mainService.getWxCpConfigStorage().getApiUrl(GET_TFA_INFO),
+      GsonHelper.buildJsonObject("code", code));
+    return WxCpGsonBuilder.create().fromJson(responseText, WxCpSecondVerificationInfo.class);
   }
 }

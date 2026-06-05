@@ -1,5 +1,6 @@
 package cn.binarywang.wx.miniapp.bean;
 
+import cn.binarywang.wx.miniapp.bean.xpay.WxMaXPayTeamInfo;
 import cn.binarywang.wx.miniapp.config.WxMaConfig;
 import cn.binarywang.wx.miniapp.util.crypt.WxMaCryptUtils;
 import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
@@ -31,7 +32,7 @@ public class WxMaMessage implements Serializable {
   private static final long serialVersionUID = -3586245291677274914L;
 
   /**
-   * 使用dom4j解析的存放所有xml属性和值的map.
+   * 使用dom4j解析的存放所有xml或json属性和值的map.
    */
   private Map<String, Object> allFieldsMap;
 
@@ -188,7 +189,7 @@ public class WxMaMessage implements Serializable {
   @XStreamConverter(value = XStreamCDataConverter.class)
   private String revokeInfo;
 
-  @SerializedName("OpenID")
+  @SerializedName(value = "OpenID", alternate = {"OpenId"})
   @XStreamAlias("OpenID")
   @XStreamConverter(value = XStreamCDataConverter.class)
   private String openId;
@@ -211,6 +212,331 @@ public class WxMaMessage implements Serializable {
 
   @XStreamAlias("SubscribeMsgSentEvent")
   private WxMaSubscribeMsgEvent.SubscribeMsgSentEvent subscribeMsgSentEvent;
+
+  // 小程序基本信息
+
+  //region 小程序基本信息 infoType=notify_3rd_wxa_auth_and_icp
+
+  /**
+   * 返回值
+   */
+  @XStreamAlias("ret")
+  private String ret;
+
+  /**
+   * 一级类目id
+   */
+  @XStreamAlias("first")
+  private String first;
+
+  /**
+   * 二级类目id
+   */
+  @XStreamAlias("second")
+  private String second;
+
+  /**
+   * 驳回原因
+   */
+  @XStreamAlias("reason")
+  private String reason;
+
+  /**
+   * 小程序代码审核驳回原因
+   */
+  @XStreamAlias("Reason")
+  private String weAppReason;
+
+  /**
+   * 昵称
+   */
+  @XStreamAlias("nickname")
+  private String nickname;
+
+  /**
+   * 原始通知内容
+   */
+  private String context;
+
+  /**
+   * 微信支付订单号
+   */
+  @XStreamAlias("transaction_id")
+  private String transactionId;
+  /**
+   * 商户号
+   */
+  @XStreamAlias("merchant_id")
+  private String merchantId;
+  /**
+   * 子商户号
+   */
+  @XStreamAlias("sub_merchant_id")
+  private String subMerchantId;
+  /**
+   * 商户订单号
+   */
+  @XStreamAlias("merchant_trade_no")
+  private String merchantTradeNo;
+  /**
+   * 支付成功时间，秒级时间戳
+   */
+  @XStreamAlias("pay_time")
+  private Long payTime;
+  /**
+   * 消息文本内容
+   */
+  @XStreamAlias("msg")
+  private String msg;
+  /**
+   * 发货时间，秒级时间戳
+   */
+  @XStreamAlias("shipped_time")
+  private Long shippedTime;
+  /**
+   * 预计结算时间，秒级时间戳。发货时推送才有该字段
+   */
+  @XStreamAlias("estimated_settlement_time")
+  private Long estimatedSettlementTime;
+  /**
+   * 确认收货方式：1. 手动确认收货；2. 自动确认收货。结算时推送才有该字段
+   */
+  @XStreamAlias("confirm_receive_method")
+  private Integer confirmReceiveMethod;
+  /**
+   * 确认收货时间，秒级时间戳。结算时推送才有该字段
+   */
+  @XStreamAlias("confirm_receive_time")
+  private Long confirmReceiveTime;
+  /**
+   * 订单结算时间，秒级时间戳。结算时推送才有该字段
+   */
+  @XStreamAlias("settlement_time")
+  private Long settlementTime;
+
+  // xpay_refund_notify 退款推送字段
+
+  /**
+   * 微信退款单号.
+   * xpay_refund_notify
+   */
+  @SerializedName("WxRefundId")
+  @XStreamAlias("WxRefundId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String wxRefundId;
+
+  /**
+   * 商户退款单号.
+   * xpay_refund_notify
+   */
+  @SerializedName("MchRefundId")
+  @XStreamAlias("MchRefundId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String mchRefundId;
+
+  /**
+   * 退款单对应支付单的微信单号.
+   * xpay_refund_notify
+   */
+  @SerializedName("WxOrderId")
+  @XStreamAlias("WxOrderId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String wxOrderId;
+
+  /**
+   * 退款单对应支付单的商户单号.
+   * xpay_refund_notify
+   */
+  @SerializedName("MchOrderId")
+  @XStreamAlias("MchOrderId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String mchOrderId;
+
+  /**
+   * 退款金额，单位分.
+   * xpay_refund_notify
+   */
+  @SerializedName("RefundFee")
+  @XStreamAlias("RefundFee")
+  private Integer refundFee;
+
+  /**
+   * 退款结果，0为成功，非0为失败.
+   * xpay_refund_notify
+   */
+  @SerializedName("RetCode")
+  @XStreamAlias("RetCode")
+  private Integer retCode;
+
+  /**
+   * 退款结果详情，失败时为退款失败的原因.
+   * xpay_refund_notify
+   */
+  @SerializedName("RetMsg")
+  @XStreamAlias("RetMsg")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String retMsg;
+
+  /**
+   * 开始退款时间，秒级时间戳.
+   * xpay_refund_notify
+   */
+  @SerializedName("RefundStartTimestamp")
+  @XStreamAlias("RefundStartTimestamp")
+  private Long refundStartTimestamp;
+
+  /**
+   * 结束退款时间，秒级时间戳.
+   * xpay_refund_notify
+   */
+  @SerializedName("RefundSuccTimestamp")
+  @XStreamAlias("RefundSuccTimestamp")
+  private Long refundSuccTimestamp;
+
+  /**
+   * 退款单的微信支付单号.
+   * xpay_refund_notify
+   */
+  @SerializedName("WxpayRefundTransactionId")
+  @XStreamAlias("WxpayRefundTransactionId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String wxpayRefundTransactionId;
+
+  /**
+   * 重试次数，从0开始，重试间隔为2 4 8 16...最多15次.
+   * xpay_refund_notify
+   */
+  @SerializedName("RetryTimes")
+  @XStreamAlias("RetryTimes")
+  private Integer retryTimes;
+
+  /**
+   * 拼团信息.
+   * xpay_goods_deliver_notify, xpay_refund_notify
+   */
+  @SerializedName("TeamInfo")
+  @XStreamAlias("TeamInfo")
+  private WxMaXPayTeamInfo teamInfo;
+
+  // xpay_complaint_notify 用户投诉推送字段
+
+  /**
+   * 微信支付交易单号.
+   * xpay_complaint_notify
+   */
+  @SerializedName("TransactionId")
+  @XStreamAlias("TransactionId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String complaintTransactionId;
+
+  /**
+   * 投诉单号.
+   * xpay_complaint_notify
+   */
+  @SerializedName("ComplaintId")
+  @XStreamAlias("ComplaintId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String complaintId;
+
+  /**
+   * 投诉详情.
+   * xpay_complaint_notify
+   */
+  @SerializedName("ComplaintDetail")
+  @XStreamAlias("ComplaintDetail")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String complaintDetail;
+
+  /**
+   * 投诉时间，秒级时间戳.
+   * xpay_complaint_notify
+   */
+  @SerializedName("ComplaintTime")
+  @XStreamAlias("ComplaintTime")
+  private Long complaintTime;
+
+  /**
+   * 请求编号.
+   * xpay_complaint_notify
+   */
+  @SerializedName("RequestId")
+  @XStreamAlias("RequestId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String requestId;
+
+  // xpay_subscribe_ios_refund_query_notify iOS退款查询通知字段
+
+  /**
+   * 问询时间，Unix时间戳.
+   * xpay_subscribe_ios_refund_query_notify
+   */
+  @SerializedName("refund_time")
+  @XStreamAlias("refund_time")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String refundTime;
+
+  /**
+   * 该笔退款的订单时间（退款订单对应的交易时间），Unix时间戳.
+   * xpay_subscribe_ios_refund_query_notify
+   */
+  @SerializedName("order_time")
+  @XStreamAlias("order_time")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String orderTime;
+
+  /**
+   * Apple 支付票据号.
+   * xpay_subscribe_ios_refund_query_notify
+   */
+  @SerializedName("channel_bill")
+  @XStreamAlias("channel_bill")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String channelBill;
+
+  /**
+   * 应用的 Apple bundleid.
+   * xpay_subscribe_ios_refund_query_notify
+   */
+  @SerializedName("bundleid")
+  @XStreamAlias("bundleid")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String bundleid;
+
+  /**
+   * 道具 id.
+   * xpay_subscribe_ios_refund_query_notify
+   */
+  @SerializedName("product_id")
+  @XStreamAlias("product_id")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String xpayProductId;
+
+  /**
+   * 道具/代币数量.
+   * xpay_subscribe_ios_refund_query_notify
+   */
+  @SerializedName("p_count")
+  @XStreamAlias("p_count")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String pCount;
+
+  /**
+   * 用户请求退款的原因.
+   * xpay_subscribe_ios_refund_query_notify
+   */
+  @SerializedName("refund_request_reason")
+  @XStreamAlias("refund_request_reason")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String refundRequestReason;
+
+  /**
+   * 发货状态，0：未发货 1：已发货 2：发货中.
+   * xpay_subscribe_ios_refund_query_notify
+   */
+  @SerializedName("provide_status")
+  @XStreamAlias("provide_status")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String provideStatus;
 
   /**
    * 不要直接使用这个字段，
@@ -261,7 +587,9 @@ public class WxMaMessage implements Serializable {
                                              WxMaConfig wxMaConfig, String timestamp, String nonce,
                                              String msgSignature) {
     String plainText = new WxMaCryptUtils(wxMaConfig).decryptXml(msgSignature, timestamp, nonce, encryptedXml);
-    return fromXml(plainText);
+    WxMaMessage wxMaMessage = fromXml(plainText);
+    wxMaMessage.setContext(plainText);
+    return wxMaMessage;
   }
 
   public static WxMaMessage fromEncryptedXml(InputStream is, WxMaConfig wxMaConfig, String timestamp,
@@ -287,6 +615,7 @@ public class WxMaMessage implements Serializable {
       }
       message.setUselessMsg(null);
     }
+    message.setAllFieldsMap(WxMaGsonBuilder.create().fromJson(json, Map.class));
     return message;
   }
 
@@ -315,6 +644,30 @@ public class WxMaMessage implements Serializable {
 
   public String toJson() {
     return WxMaGsonBuilder.create().toJson(this);
+  }
+
+  public String getAppid() {
+    return appid;
+  }
+
+  public void setAppid(String appid) {
+    this.appid = appid;
+  }
+
+  public String getAppID() {
+    return appID;
+  }
+
+  public void setAppID(String appID) {
+    this.appID = appID;
+  }
+
+  public String getAppId() {
+    return appId;
+  }
+
+  public void setAppId(String appId) {
+    this.appId = appId;
   }
 
 }

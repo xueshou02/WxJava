@@ -1,0 +1,10 @@
+<xml>
+  <msgDataFormat>JSON或者XML</msgDataFormat>
+  <appid>appid</appid>
+  <secret>secret</secret>
+  <token>Token</token>
+  <aesKey>EncodingAESKey</aesKey>
+  <stableAccessToken>false</stableAccessToken>
+  <accessToken>可以不填写</accessToken>
+  <expiresTime>可以不填写</expiresTime>
+</xml>

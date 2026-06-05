@@ -10,7 +10,7 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.spy;
  * 测试类.
  *
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
- * @date 2019-06-16
+ * created on  2019-06-16
  */
 
 @Test
